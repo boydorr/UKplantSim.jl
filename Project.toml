@@ -1,0 +1,11 @@
+[deps]
+BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
+ClimatePref = "21e50a1b-ea2d-5c46-9379-c0b863303ae1"
+Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
+JLD = "4138dd39-2aa7-5051-a626-17a0bb65d9c8"
+Makie = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a"
+MyUnitful = "0a6c8c22-afc9-56dd-8ae0-6497d1f1ca28"
+Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
+PyPlot = "d330b81b-6aea-500a-939a-2ce795aea3ee"
+Simulation = "32412955-7621-5ad6-a026-c690bd158fd1"
+Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
