@@ -2,4 +2,6 @@ julia 0.6-
 Simulation
 Unitful
 MyUnitful
-Distributions
+ClimatePref
+AxisArrays
+PyCall

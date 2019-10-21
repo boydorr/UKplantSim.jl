@@ -18,6 +18,6 @@ file = "data/CEH_landcover_2015.tif"
 lc = readLC(file)
 
 file = "data/CEH_landcover_2015_ireland.tif"
-lci = readLC(file, 1.8e5, 3.7e5, 3e5, 4.6e5)
+lci = readLC(file, false)
 
 plot(lci)
