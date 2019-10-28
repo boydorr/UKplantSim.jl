@@ -3,7 +3,6 @@ using Unitful.DefaultSymbols
 using MyUnitful
 using AxisArrays
 using NetCDF
-using Compat
 using JuliaDB
 
 import Unitful.°, Unitful.°C, Unitful.mm
