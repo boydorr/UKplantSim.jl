@@ -6,4 +6,7 @@ ClimatePref
 AxisArrays
 PyCall
 RecipesBase
+NetCDF
+JuliaDB
+ArchGDAL
 
