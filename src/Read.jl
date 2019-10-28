@@ -4,6 +4,7 @@ using MyUnitful
 using AxisArrays
 using NetCDF
 using Compat
+using JuliaDB
 
 import Unitful.°, Unitful.°C, Unitful.mm
 import ArchGDAL
@@ -18,8 +19,6 @@ unitdict = Dict("K" => K, "m" => m, "J m**-2" => J/m^2, "m**3 m**-3" => m^3, "de
 Function to search a directory `path` using a given `key` string.
 """
 searchdir(path,key) = filter(x->Compat.occursin(key, x), readdir(path))
-dir = "data/HadUK/tas/"
-param = "tas"
 
 """
     read(f, filename)
@@ -41,9 +40,9 @@ Function to import a selected CEH land cover file from a path string. Optional a
 """
 function readLC(file::String, GB::Bool=true)
     if GB
-        xmin = 0, xmax = 7e5, ymin = 0, ymax = 1.3e6
+        xmin = 0; xmax = 7e5; ymin = 0; ymax = 1.3e6
     else
-        xmin = 1.8e5, xmax = 3.7e5, ymin = 3e5, ymax = 4.6e5
+        xmin = 1.8e5; xmax = 3.7e5; ymin = 3e5; ymax = 4.6e5
     end
     txy = [Float64, Int64(1), Int64(1), Float64(1)]
     #
@@ -97,4 +96,23 @@ function readHadUK(dir::String, param::String, times::Vector{T}) where T<: Unitf
     end
     uk = AxisArray(array, Axis{:longitude}(lon * m), Axis{:latitude}(lat * m), Axis{:month}(times))
     return HadUK(uk[0.0m..1e6m, 0.0m..1.25e6m, :])
+end
+
+"""
+    readPlantATT(file::String)
+
+Function to import PlantATT data as a JuliaDB table.
+"""
+function readPlantATT(file::String)
+    coldict = Dict(:BRC_code => String, :Taxon_name => String, :Fam => String, :FamA => String, :OrdA => String, :NS => String, :CS => String, :RS => String, :Chg => Float64, :Hght => Float64, :Len => Float64, :P1 => String, :P2 => String, :LF1 => String, :LF2 => String, :W => String, :Clone1 => String, :Clone2 => String, :E1 => Int64, :E2 => Int64, :C => String, :NBI => Int64, :NEur => String, :SBI => Int64, :SEur => String, :Origin => String, :GB => Int64, :IR => Int64, :CI => Int64, :Tjan => Float64, :Tjul => Float64, :Prec => Int64, :Co => String, :Br_Habitats => Vector{Int64}, :L => Int64, :F => Int64, :R => Int64, :N => Int64, :S => Int64)
+    return loadtable(file, colparsers = coldict)
+end
+
+"""
+    readNPMS(file::String)
+
+Function to import National Plant Monitoring Scheme data as a JuliaDB table.
+"""
+function readNPMS(file::String)
+    return loadtable(file)
 end

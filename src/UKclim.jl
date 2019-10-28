@@ -7,6 +7,6 @@ include("ClimateTypes.jl")
 export HadUK
 
 include("Read.jl")
-export readHadUK, readLC
+export readHadUK, readLC, readPlantATT, readNPMS
 
 end
