@@ -14,7 +14,7 @@ def retrieve_HadUK(param, from_year, to_year, directory, user = "charris009", pa
       # change the remote directory
       f.cwd(f'/badc/ukmo-hadobs/data/insitu/MOHC/HadOBS/HadUK-Grid/v1.0.0.0/1km/{param}/mon/v20181126/')
       # define filename
-      file=f'tas_hadukgrid_uk_1km_mon_{year}01-{year}12.nc'
+      file=f'{param}_hadukgrid_uk_1km_mon_{year}01-{year}12.nc'
       # get the remote file to the local directory
       f.retrbinary("RETR %s" % file, open(file, "wb").write)
 
