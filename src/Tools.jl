@@ -11,8 +11,7 @@ function OSGR_eastnorth(osgridref::String)
     [easting, northing]
 end
 
-function extractvalues(x::Vector{typeof(1m)},y::Vector{typeof(1m)},
-    ref::Reference)
+function extractvalues(x::Vector{L},y::Vector{L}, ref::Reference) where L <: Unitful.Length
     all(x .<= 7e5m) && all(x .>= 0.0m) ||
     error("X coordinate is out of bounds")
     all(y .<= 1.3e6m) && all(y .>= 0.0m) ||
@@ -24,8 +23,7 @@ function extractvalues(x::Vector{typeof(1m)},y::Vector{typeof(1m)},
     end
 end
 
-function extractvalues(x::typeof(1m),y::typeof(1m),
-    ref::Reference)
+function extractvalues(x::L, y::L, ref::Reference) where L <: Unitful.Length
     (x <= 7e5m) && (x >= 0.0m) ||
     error("X coordinate is out of bounds")
     (y <= 1.3e6m) && (y >= 0.0m) ||
