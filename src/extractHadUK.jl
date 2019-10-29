@@ -15,9 +15,10 @@ def retrieve_HadUK(param, from_year, to_year, directory, user = "charris009", pa
         file=f'{param}_hadukgrid_uk_1km_mon_{year}01-{year}12.nc'
         # get the remote file to the local directory
         f.retrbinary("RETR %s" % file, open(file, "wb").write)
-        # Close FTP connection
-        f.close()
+    # Close FTP connection
+    f.close()
 """
 function retrieve_HadUK(param::String, from_year::Int64, to_year::Int64, directory::String = ".")
+    isdir(directory) || mkdir(directory)
     py"retrieve_HadUK"(param, from_year, to_year, directory)
 end
