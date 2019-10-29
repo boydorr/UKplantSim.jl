@@ -10,14 +10,14 @@ import ArchGDAL
 import Base.read
 const AG = ArchGDAL
 
-unitdict = Dict("K" => K, "m" => m, "J m**-2" => J/m^2, "m**3 m**-3" => m^3, "degC" => °C)
+unitdict = Dict("K" => K, "m" => m, "J m**-2" => J/m^2, "m**3 m**-3" => m^3, "degC" => °C, "mm" => mm)
 
 """
     searchdir(path,key)
 
 Function to search a directory `path` using a given `key` string.
 """
-searchdir(path,key) = filter(x->Compat.occursin(key, x), readdir(path))
+searchdir(path,key) = filter(x->occursin(key, x), readdir(path))
 
 """
     read(f, filename)
@@ -53,7 +53,7 @@ function readLC(file::String, GB::Bool=true)
         print(dataset)
     end
 
-    a = Array{txy[1], 2}(Compat.undef, txy[2], txy[3])
+    a = Array{txy[1], 2}(undef, txy[2], txy[3])
     read(file) do dataset
         bd = AG.getband(dataset, 1);
         AG.read!(bd, a);
