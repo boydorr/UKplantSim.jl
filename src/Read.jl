@@ -10,7 +10,7 @@ import ArchGDAL
 import Base.read
 const AG = ArchGDAL
 
-unitdict = Dict("K" => K, "m" => m, "J m**-2" => J/m^2, "m**3 m**-3" => m^3, "degC" => °C, "mm" => mm)
+unitdict = Dict("K" => K, "m" => m, "J m**-2" => J/m^2, "m**3 m**-3" => m^3, "degC" => °C, "mm" => mm, "hour" => u"hr")
 
 """
     searchdir(path,key)
@@ -63,7 +63,7 @@ function readLC(file::String, GB::Bool=true)
     latitude = (xmin+ step):step:xmax
     longitude = (ymin+ step):step:ymax
     size(longitude)
-    lc = AxisArray(a[:, end:-1:1], Axis{:latitude}(latitude), Axis{:longitude}(reverse(longitude)));
+    lc = AxisArray(a[:, end:-1:1], Axis{:easting}(latitude * m), Axis{:northing}(longitude * m));
 
     if txy[1] <: AbstractFloat
         lc[lc .== lc[1]] *= NaN;
@@ -93,7 +93,7 @@ function readHadUK(dir::String, param::String, times::Vector{T}) where T<: Unitf
     if typeof(units) <: Unitful.TemperatureUnits
         array = uconvert.(K, array)
     end
-    uk = AxisArray(array, Axis{:longitude}(lon * m), Axis{:latitude}(lat * m), Axis{:month}(times))
+    uk = AxisArray(array, Axis{:easting}(lon * m), Axis{:northing}(lat * m), Axis{:month}(times))
     return HadUK(uk[0.0m..1e6m, 0.0m..1.25e6m, :])
 end
 
