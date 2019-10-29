@@ -50,3 +50,20 @@ end
     seriestype  :=  :heatmap
     transpose(lc.array)
 end
+
+@recipe function f(lc::Dict)
+    order = sortperm(Float64.(keys(lc)))
+    lcnames = [LC2015cats[x] for x in Float64.(keys(lc))[order]]
+    colorder = Float64.(keys(lc))[order]
+    colorder[end] = 22
+    color := [:red2,:chartreuse4, :red4, :chartreuse, :lightgreen, :yellowgreen, :gold4, :yellow, :darkmagenta, :lightpink,  :seagreen, :lavender, :navy, :blue, :gold3,:gold3, :khaki1, :khaki1, :lightslateblue, :black, :grey, :white][Int.(colorder)]
+    grid := false
+    seriestype  :=  :bar
+    legend := false
+    size := (1400, 1000)
+    xrotation := 55
+    guidefontsize := 12
+    tickfontsize := 12
+    xticks := :all
+    lcnames, Int.(values(lc))[order]
+end
