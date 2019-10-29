@@ -9,4 +9,7 @@ export HadUK
 include("Read.jl")
 export readHadUK, readLC, readPlantATT, readNPMS
 
+include("Tools.jl")
+export OSGR_eastnorth, extractvalues, createRef, LC2015cats
+
 end
