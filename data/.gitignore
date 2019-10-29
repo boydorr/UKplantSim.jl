@@ -1,2 +1,6 @@
 *.jld
 *.nc
+*.tree
+*.csv
+*.xls
+GBIF*
