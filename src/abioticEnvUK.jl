@@ -2,7 +2,7 @@ using Simulation
 using Unitful
 using Unitful.DefaultSymbols
 using MyUnitful
-import Simulation: matchdict, cancel, HabitatUpdate, NoChange, eraChange
+import Simulation: matchdict, cancel, HabitatUpdate, NoChange, eraChange, AbstractBudget
 
 function lcAE(lc::LandCover, maxbud::Unitful.Quantity{Float64}, area::Unitful.Area)
     dimension = size(lc.array)
