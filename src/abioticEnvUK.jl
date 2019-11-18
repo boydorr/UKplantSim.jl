@@ -70,10 +70,10 @@ function hadAE(had::HadUK, maxbud::Unitful.Quantity{Float64}, area::Unitful.Area
     budtype = matchdict[unit(B)]
      return GridAbioticEnv{typeof(hab), budtype}(hab, active, budtype(bud))
 end
-function hadAE(had::HadUK, bud::SolarTimeBudget, active::Array{Bool, 2})
+function hadAE(had::HadUK, bud::B, active::Array{Bool, 2}) where {B <: AbstractBudget}
     dimension = size(had.array)[1:2]
     gridsquaresize = had.array.axes[1].val[2] - had.array.axes[1].val[1]
-    gridsquaresize = ustrip.(gridsquaresize) * 111.32km
+    gridsquaresize = uconvert(km, gridsquaresize)
     hab = ContinuousTimeHab(Array(had.array), 1, gridsquaresize,
         HabitatUpdate{Unitful.Dimensions{()}}(eraChange, 0.0/s))
 
