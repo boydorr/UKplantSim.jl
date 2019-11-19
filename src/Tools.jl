@@ -2,6 +2,8 @@ using BritishNationalGrid
 using ClimatePref
 using AxisArrays
 using Unitful
+using JuliaDBMeta
+using JuliaDB
 
 function OSGR_eastnorth(osgridref::String)
     squares = BritishNationalGrid.square_names()
@@ -47,3 +49,18 @@ function createRef(gridsize::Unitful.Length{Float64}, xmin, xmax, ymin, ymax)
 end
 
 LC2015cats = Dict(1.0 => "Broadleaved woodland", 2.0 => "Coniferous woodland", 3.0 => "Arable and horticulture", 4.0 => "Improved grassland", 5.0 => "Neutral grassland", 6.0 => "Calcareous grassland", 7.0 => "Acid grassland", 8.0 => "Fen, marsh and swamp", 9.0 => "Heather", 10.0 => "Heather grassland", 11.0 => "Bog", 12.0 => "Inland rock", 13.0 => "Saltwater", 14.0 => "Freshwater", 15.0 => "Supra-littoral rock", 16.0 => "Supra-littoral sediment", 17.0 => "Littoral rock", 18.0 => "Littoral sediment", 19.0 => "Saltmarsh", 20.0 => "Urban", 21.0 => "Suburban", NaN => "Unknown")
+
+function startingArray(uk::JuliaDB.DIndexedTable, numspecies::Int64)
+    ref = createRef(1000.0m, 500.0m, 7e5m, 500.0m, 1.25e6m)
+    fillarray = Array{Int64, 2}(undef, numspecies, length(ref.array))
+    grouped_tab = @groupby uk (:SppID, :refval) {count = length(:refid)}
+    ids = sort(unique(collect(select(uk, :SppID))))
+    dict = Dict(zip(ids, 1:length(ids)))
+    sppnames = [dict[x] for x in collect(select(grouped_tab, :SppID))]
+    refs = collect(select(grouped_tab, :refval))
+    counts = collect(select(grouped_tab, :count))
+    map(1:length(counts)) do i
+        fillarray[sppnames[i], refs[i]] = counts[i] .* 1e3
+    end
+    return fillarray
+end

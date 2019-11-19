@@ -22,3 +22,12 @@ function retrieve_HadUK(param::String, from_year::Int64, to_year::Int64, directo
     isdir(directory) || mkdir(directory)
     py"retrieve_HadUK"(param, from_year, to_year, directory)
 end
+
+
+
+
+#for file in `cat short.txt`; do open -a /Applications/Safari.app https:/catalogue.ceh.ac.uk/$file; sleep 1; done
+
+#curl -O "https:/catalogue.ceh.ac.uk/datastore/eidchub/b745e7b1-626c-4ccc-ac27-56582e77b900/chess_dtr_196101.nc" --output "test.nc"
+
+#wget https://catalogue.ceh.ac.uk/datastore/eidchub/b745e7b1-626c-4ccc-ac27-56582e77b900/chess_dtr_196101.nc --user claire.harris@bioss.ac.uk --password Landcover3019
