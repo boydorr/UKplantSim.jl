@@ -115,24 +115,28 @@ LC_counts = collect(@groupby uk :species {lc = :lc})
 save(LC_counts, "GBIF_LC_prefs_UK")
 
 @everywhere namean(x) = mean(x[.!isnan.(x)])
+@everywhere nastd(x) = std(x[.!isnan.(x)])
 @everywhere using Statistics
-dir = "HadUK/tas/10s/"
+dir = "HadUK/tas/"
 times = collect(2010year:1month:2017year+11month)
 tas = readHadUK(dir, "tas", times)
 dir = "HadUK/rainfall/"
 rainfall = readHadUK(dir, "rainfall", times)
+dir = "HadUK/sun/"
+sun = readHadUK(dir, "sun", times)
 
 # Take means of 2015 (same as for LC)
 meantas2015 = mapslices(mean, tas.array[:, :, 2015year..2015year+11months]./K, dims = 3)[:, :, 1]
 meanrainfall2015 = mapslices(mean, rainfall.array[:, :, 2015year..2015year+11months]./mm, dims = 3)[:, :, 1]
+meansun2015 = mapslices(mean, (uconvert.(kJ, 1km^2 .* sun.array[:, :, 2015year..2015year+11months] .* 1000*(W/m^2)))./kJ, dims = 3)[:, :, 1]
 
 # Extract reference values
 ref = createRef(1000.0m, 500.0m, 7e5m, 500.0m, 1.25e6m)
 uk = @transform uk {refval = UKclim.extractvalues(:east * m, :north * m, ref)}
-uk = @transform uk {tas = meantas2015[:refval], rainfall = meanrainfall2015[:refval]}
+uk = @transform uk {tas = meantas2015[:refval], rainfall = meanrainfall2015[:refval], sun = meansun2015[:refval]}
 
 # Calculate averages per species and plot as histogram
-had_counts = collect(@groupby uk :species {tas = namean(:tas), rainfall = namean(:rainfall)})
+had_counts = collect(@groupby uk :species {tas = namean(:tas), rainfall = namean(:rainfall), sun = namean(:sun), tas_st = nastd(:tas), rain_st = nastd(:rainfall)})
 save(had_counts, "GBIF_had_prefs_UK")
 
 
