@@ -1,0 +1,10 @@
+/datastore/eidchub/b745e7b1-626c-4ccc-ac27-56582e77b900/chess_dtr_196101.nc
+/datastore/eidchub/b745e7b1-626c-4ccc-ac27-56582e77b900/chess_dtr_196102.nc
+/datastore/eidchub/b745e7b1-626c-4ccc-ac27-56582e77b900/chess_dtr_196103.nc
+/datastore/eidchub/b745e7b1-626c-4ccc-ac27-56582e77b900/chess_dtr_196104.nc
+/datastore/eidchub/b745e7b1-626c-4ccc-ac27-56582e77b900/chess_dtr_196105.nc
+/datastore/eidchub/b745e7b1-626c-4ccc-ac27-56582e77b900/chess_dtr_196106.nc
+/datastore/eidchub/b745e7b1-626c-4ccc-ac27-56582e77b900/chess_dtr_196107.nc
+/datastore/eidchub/b745e7b1-626c-4ccc-ac27-56582e77b900/chess_dtr_196108.nc
+/datastore/eidchub/b745e7b1-626c-4ccc-ac27-56582e77b900/chess_dtr_196109.nc
+/datastore/eidchub/b745e7b1-626c-4ccc-ac27-56582e77b900/chess_dtr_196110.nc
