@@ -10,9 +10,15 @@ using Statistics
 using Simulation
 using Distributions
 using Plots
-plotlyjs()
+gr()
 
 uk = JuliaDB.load("UKspecies")
+uk = @transform uk {east = BNGPoint(lon = :decimallongitude, lat = :decimallatitude).e, north = BNGPoint(lon = :decimallongitude, lat = :decimallatitude).n}
+
+# Create reference for UK grid
+ref = createRef(1000.0m, 1000.0m, 7e5m, 1000.0m, 1.3e6m)
+uk = @transform uk {refval = UKclim.extractvalues(:east * m, :north * m, ref)}
+
 traits = load("GBIF_had_prefs_UK")
 numSpecies = length(traits)
 individuals = Int(1e9)
@@ -54,7 +60,7 @@ sppl = SpeciesList(numSpecies, trts, abun, req, movement, param, native)
 # Read in landcover 2015 data
 file = "CEH_landcover_2015.tif"
 lc = readLC(file)
-#plot(lc)
+plot(lc)
 
 # Import HadUK grid data
 dir = "HadUK/tas/"
@@ -89,3 +95,12 @@ eco = Ecosystem(emptypopulate!, sppl, ae, rel)
 
 start = startingArray(uk, numSpecies)
 eco.abundances.matrix .+= start
+
+abun = norm_sub_alpha(Metacommunity(start), 0.0)[:diversity]
+abun = reshape(abun, 700, 1250)
+abun[isnan.(abun)] .= 0
+abun[.!active] .= NaN
+heatmap(transpose(abun), background_color = :lightblue, background_color_outside = :white,
+grid = false, color = :algae, aspect_ratio = 1)
+
+simulate!(eco, 1year, 1month)
