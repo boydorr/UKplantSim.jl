@@ -9,6 +9,7 @@ using AxisArrays
 using Statistics
 using Simulation
 using Distributions
+using Diversity
 using Plots
 gr()
 
@@ -20,6 +21,8 @@ ref = createRef(1000.0m, 1000.0m, 7e5m, 1000.0m, 1.3e6m)
 uk = @transform uk {refval = UKclim.extractvalues(:east * m, :north * m, ref)}
 
 traits = load("GBIF_had_prefs_UK")
+traits = filter(t-> !isnan(t.sun) & !isnan(t.rainfall) & !isnan(t.tas_st) & !isnan(t.rain_st), traits)
+uk = filter(u-> u.species in select(traits, :species), uk)
 numSpecies = length(traits)
 individuals = Int(1e9)
 
@@ -35,10 +38,12 @@ req = ReqCollection2(req1, req2)
 
 tmean = collect(select(traits, :tas)) .* K
 tsd = collect(select(traits, :tas_st)) .* K
+tsd .+= 1e-3K
 temp_traits = GaussTrait(tmean, tsd)
 
 pmean = collect(select(traits, :rainfall)) .* mm
 psd = collect(select(traits, :rain_st)) .* mm
+psd .+= 1e-3mm
 prec_traits = GaussTrait(pmean, psd)
 
 av_dist = rand(Uniform(0.6, 2.4), numSpecies) .* km
@@ -104,3 +109,9 @@ heatmap(transpose(abun), background_color = :lightblue, background_color_outside
 grid = false, color = :algae, aspect_ratio = 1)
 
 simulate!(eco, 1year, 1month)
+
+abun = norm_sub_alpha(Metacommunity(abun), 0.0)[:diversity]
+abun = reshape(abun, 700, 1250)
+abun[isnan.(abun)] .= 0
+abun[.!active] .= NaN
+heatmap(transpose(abun), background_color = :lightblue, background_color_outside = :white, grid = false, color = :algae, aspect_ratio = 1)
