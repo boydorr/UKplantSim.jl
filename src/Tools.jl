@@ -64,3 +64,22 @@ function startingArray(uk::JuliaDB.DIndexedTable, numspecies::Int64)
     end
     return fillarray
 end
+
+function startingArray(bsbi::JuliaDB.DIndexedTable, numspecies::Int64, sf::Int64)
+    ref = createRef(1000.0m, 500.0m, 7e5m, 500.0m, 1.25e6m)
+    fillarray = Array{Int64, 2}(undef, numspecies, length(ref.array))
+    grouped_tab = @groupby bsbi (:SppID, :refval) {count = length(:refid)}
+    ids = sort(unique(collect(select(bsbi, :SppID))))
+    dict = Dict(zip(ids, 1:length(ids)))
+    sppnames = [dict[x] for x in collect(select(grouped_tab, :SppID))]
+    refs = collect(select(grouped_tab, :refval))
+    counts = collect(select(grouped_tab, :count))
+    map(1:length(counts)) do i
+        x, y = convert_coords(refs[i], size(ref.array, 1))
+        xs = collect(x:(x + sf -1)); ys =  collect(y:(y + sf-1))
+        xs = xs[xs .< 700]; ys = ys[ys .< 1250]
+        newrefs = ref.array[xs, ys][1:end]
+        fillarray[sppnames[i], newrefs] .= rand(Multinomial(Int64(counts[i] .* 1e3), length(newrefs)))
+    end
+    return fillarray
+end
