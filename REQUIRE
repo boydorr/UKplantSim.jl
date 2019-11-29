@@ -8,6 +8,6 @@ PyCall
 RecipesBase
 NetCDF
 JuliaDB
+JuliaDBMeta
 ArchGDAL
 BritishNationalGrid
-
