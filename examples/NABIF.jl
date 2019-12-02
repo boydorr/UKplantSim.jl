@@ -30,7 +30,7 @@ bsbi = filter(b -> b.NAME ∈ cross_species, bsbi)
 ref = createRef(1000.0m, 500.0m, 7e5m, 500.0m, 1.25e6m)
 bsbi = @transform bsbi {refval = UKclim.extractvalues(:EAST * m, :NORTH * m, ref), refid = 1}
 
-bsbi = distribute(bsbi, 1)
+bsbi = distribute(bsbi, 12)
 start = startingArray(bsbi, length(species), 10)
 
 abun = norm_sub_alpha(Metacommunity(start), 0.0)[:diversity]
@@ -48,6 +48,7 @@ function coarsenRef(refval::Int64, width::Int64, sf::Int64)
     xs = xs[xs .< 700]; ys = ys[ys .< 1250]
     return ref.array[xs, ys][1:end]
 end
+bsbi = @transform bsbi {cr = coarsenRef(:refval, 700, 10)}
 
 @everywhere namean(x) = mean(x[.!isnan.(x)])
 @everywhere nastd(x) = std(x[.!isnan.(x)])

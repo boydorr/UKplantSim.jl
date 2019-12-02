@@ -22,6 +22,7 @@ uk = @transform uk {refval = UKclim.extractvalues(:east * m, :north * m, ref)}
 
 traits = load("GBIF_had_prefs_UK")
 traits = filter(t-> !isnan(t.sun) & !isnan(t.rainfall) & !isnan(t.tas_st) & !isnan(t.rain_st), traits)
+traits = filter(t -> (t.rain_st > 0) & (t.tas_st > 0), traits)
 uk = filter(u-> u.species in select(traits, :species), uk)
 numSpecies = length(traits)
 individuals = Int(1e9)
