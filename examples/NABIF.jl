@@ -67,8 +67,9 @@ meanrainfall2015 = mapslices(mean, rainfall.array[:, :, 2015year..2015year+11mon
 meansun2015 = mapslices(mean, (uconvert.(kJ, 1km^2 .* sun.array[:, :, 2015year..2015year+11months] .* 1000*(W/m^2)))./kJ, dims = 3)[:, :, 1]
 
 # Extract reference values
-bsbi = @transform bsbi {tas = mean(meantas2015[coarsenRef(:refval, 700, 10)])}
+bsbi = @transform bsbi {tas = mean(meantas2015[:cr]), rainfall = mean(meanrainfall2015[:cr]), sun = mean(meansun2015[:cr])}
 
 # Calculate averages per species and plot as histogram
-bsbi_counts = collect(@groupby bsbi :species {tas = namean(:tas), rainfall = namean(:rainfall), sun = namean(:sun), tas_st = nastd(:tas), rain_st = nastd(:rainfall)})
-save(had_counts, "GBIF_had_prefs_UK")
+bsbi_counts = collect(@groupby bsbi :NAME {tas = namean(:tas), rainfall = namean(:rainfall), sun = namean(:sun), tas_st = nastd(:tas), rain_st = nastd(:rainfall)})
+bsbi_counts = collect(bsbi_counts)
+save(bsbi_counts, "BSBI_had_prefs_UK")
