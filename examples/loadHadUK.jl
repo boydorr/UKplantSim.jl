@@ -8,10 +8,10 @@ using ClimatePref
 using Plots
 plotlyjs()
 
-retrieve_HadUK("tas", 2010, 2017, "/Users/claireh/Documents/PhD/GIT/UKclim/data/HadUK/tas")
-retrieve_HadUK("rainfall", 2010, 2017, "/Users/claireh/Documents/PhD/GIT/UKclim/data/HadUK/rainfall")
-retrieve_HadUK("sun", 2010, 2017, "/Users/claireh/Documents/PhD/GIT/UKclim/data/HadUK/sun")
-retrieve_HadUK("groundfrost", 2010, 2017, "/Users/claireh/Documents/PhD/GIT/UKclim/data/HadUK/groundfrost")
+retrieve_HadUK("tas", 2008, 2017, "/Users/claireh/Documents/PhD/GIT/UKclim/data/HadUK/tas")
+retrieve_HadUK("rainfall", 2008, 2017, "/Users/claireh/Documents/PhD/GIT/UKclim/data/HadUK/rainfall")
+retrieve_HadUK("sun", 2008, 2017, "/Users/claireh/Documents/PhD/GIT/UKclim/data/HadUK/sun")
+retrieve_HadUK("groundfrost", 2008, 2017, "/Users/claireh/Documents/PhD/GIT/UKclim/data/HadUK/groundfrost")
 
 dir = "data/HadUK/tas/"
 times = collect(1980year:1month:1990year+11month)

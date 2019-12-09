@@ -182,7 +182,7 @@ sppl = SpeciesList(numSpecies, trts, abun, req, movement, param, native)
 
 # Import HadUK grid data
 dir = "HadUK/tas/"
-times = collect(2010year:1month:2017year+11month)
+times = collect(2008year:1month:2017year+11month)
 tas = readHadUK(dir, "tas", times)
 dir = "HadUK/rainfall/"
 rainfall = readHadUK(dir, "rainfall", times)
@@ -224,6 +224,20 @@ grid = false, color = :algae, aspect_ratio = 1)
 
 simulate!(eco, 10years, 1month)
 
+# PLot results
+cd("/home/claireh/Documents/UK")
+using Diversity
+using UKclim
+using MyUnitful
+using JLD
+using Plots
+gr()
+times = collect(2008year:1month:2017year+11month)
+dir = "HadUK/sun/"
+sun = readHadUK(dir, "sun", times)
+active = Array{Bool, 2}(.!isnan.(sun.array[:, :, 1]))
+
+# After one decade
 abun = JLD.load("BSBI_abun.jld", "abun")
 abun = norm_sub_alpha(Metacommunity(abun), 0.0)[:diversity]
 abun = reshape(abun, 700, 1250)
@@ -231,3 +245,12 @@ abun[isnan.(abun)] .= 0
 abun[.!active] .= NaN
 heatmap(transpose(abun), background_color = :lightblue, background_color_outside = :white, grid = false, color = :algae, aspect_ratio = 1)
 Plots.pdf("BSBI_decade.pdf")
+
+# After 2 decades
+abun = JLD.load("BSBI_abun2.jld", "abun")
+abun = norm_sub_alpha(Metacommunity(abun), 0.0)[:diversity]
+abun = reshape(abun, 700, 1250)
+abun[isnan.(abun)] .= 0
+abun[.!active] .= NaN
+heatmap(transpose(abun), background_color = :lightblue, background_color_outside = :white, grid = false, color = :algae, aspect_ratio = 1)
+Plots.pdf("BSBI_decade2.pdf")
