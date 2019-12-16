@@ -10,7 +10,7 @@ import ArchGDAL
 import Base.read
 const AG = ArchGDAL
 
-unitdict = Dict("K" => K, "m" => m, "J m**-2" => J/m^2, "m**3 m**-3" => m^3, "degC" => °C, "mm" => mm, "hour" => u"hr")
+unitdict = Dict("K" => K, "m" => m, "J m**-2" => J/m^2, "m**3 m**-3" => m^3, "degC" => °C, "mm" => mm, "hour" => u"hr", "kg m-2 s-1" => kg/(m^2*s))
 
 """
     searchdir(path,key)
@@ -96,6 +96,33 @@ function readHadUK(dir::String, param::String, times::Vector{T}) where T<: Unitf
     uk = AxisArray(array, Axis{:easting}(lon * m), Axis{:northing}(lat * m), Axis{:month}(times))
     return HadUK(uk[0.0m..1e6m, 0.0m..1.25e6m, :])
 end
+
+"""
+    readCHESS(file::String)
+
+Function to import CHESS data into Julia from particular parameter.
+"""
+function readCHESS(dir::String, param::String, times::Vector{T}) where T<: Unitful.Time
+    files = searchdir(dir, ".nc")
+    lat = ncread(joinpath(dir, files[1]), "y")
+    lon = ncread(joinpath(dir, files[1]), "x")
+    units = ncgetatt(joinpath(dir, files[1]), param, "units")
+    units = unitdict[units]
+    array = map(files) do f
+        mapslices(mean, ncread(joinpath(dir, f), param), dims = 3)[:, :, 1]
+    end
+    array = cat(dims = 3, array...)
+    array[array .≈ ncgetatt(joinpath(dir, files[1]), param, "_FillValue")] .= NaN
+    array = array * 1.0 * units
+
+    # If temperature param, need to convert from Kelvin
+    if typeof(units) <: Unitful.TemperatureUnits
+        array = uconvert.(K, array)
+    end
+    uk = AxisArray(array, Axis{:easting}(lon * m), Axis{:northing}(lat * m), Axis{:month}(times))
+    return CHESS(uk[0.0m..1e6m, 0.0m..1.25e6m, :])
+end
+
 
 """
     readPlantATT(file::String)
