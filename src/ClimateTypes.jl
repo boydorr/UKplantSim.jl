@@ -28,6 +28,20 @@ end
 end
 
 """
+    CHESS <: AbstractClimate
+
+Type that houses data extracted from CHESS raster files.
+"""
+mutable struct CHESS <: AbstractClimate
+    array::AxisArray
+    function CHESS(array::AxisArray)
+        typeof(collect(axes(array, 3).val)[1])<: Unitful.Time ||
+            error("Third dimension of array must be time")
+        new(array)
+    end
+end
+
+"""
     LandCover <: AbstractClimate
 
 Type that houses data extracted from CEH landcover 2015 rasters.
