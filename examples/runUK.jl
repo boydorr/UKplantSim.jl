@@ -262,3 +262,11 @@ abun[isnan.(abun)] .= 0
 abun[.!active] .= NaN
 heatmap(transpose(abun), background_color = :lightblue, background_color_outside = :white, grid = false, color = :algae, aspect_ratio = 1)
 Plots.pdf("BSBI_decade3.pdf")
+
+abun = JLD.load("BSBI_abun4.jld", "abun")
+abun = norm_sub_alpha(Metacommunity(abun), 0.0)[:diversity]
+abun = reshape(abun, 700, 1250)
+abun[isnan.(abun)] .= 0
+abun[.!active] .= NaN
+heatmap(transpose(abun), background_color = :lightblue, background_color_outside = :white, grid = false, color = :algae, aspect_ratio = 1)
+Plots.pdf("BSBI_decade4.pdf")
