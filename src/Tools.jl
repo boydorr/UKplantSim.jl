@@ -84,3 +84,87 @@ function startingArray(bsbi::JuliaDB.DIndexedTable, numspecies::Int64, sf::Int64
     end
     return fillarray
 end
+function count_neighbours(j::Int64, refs::Vector{Int64}, ref::Reference)
+    x,y = Simulation.convert_coords(j, size(ref.array, 1))
+    neighbours = Simulation.get_neighbours(Array(ref.array), x, y, 8)
+    inds = map((x,y) -> ref.array[x, y], neighbours[:,1], neighbours[:,2])
+    return length(inds ∩ newrefs)
+end
+
+function startingArray(bsbi::JuliaDB.DIndexedTable, numspecies::Int64, sf::Int64)
+    ref = createRef(1000.0m, 500.0m, 7e5m, 500.0m, 1.25e6m)
+    fillarray = Array{Int64, 2}(undef, numspecies, length(ref.array))
+    grouped_tab = @groupby bsbi (:SppID, :refval) {count = length(:refid)}
+    ids = sort(unique(collect(select(bsbi, :SppID))))
+    dict = Dict(zip(ids, 1:length(ids)))
+    sppnames = [dict[x] for x in collect(select(grouped_tab, :SppID))]
+    refs = collect(select(grouped_tab, :refval))
+    counts = collect(select(grouped_tab, :count))
+    map(1:length(counts)) do i
+        x, y = convert_coords(refs[i], size(ref.array, 1))
+        xs = collect(x:(x + sf -1)); ys =  collect(y:(y + sf-1))
+        xs = xs[xs .< 700]; ys = ys[ys .< 1250]
+        newrefs = ref.array[xs, ys][1:end]
+        prob = map(j -> count_neighbours(j, Array(newrefs), ref), newrefs)
+        if sum(prob) == 0 prob .= 1/length(prob) end
+        fillarray[sppnames[i], newrefs] .= rand(Multinomial(Int64(counts[i] .* 1e3), prob./sum(prob)))
+    end
+    return fillarray
+end
+
+
+refs = select(filter(g-> g.SppID == ids[1], grouped_tab), :refval)
+xs,ys = convert_coords(refs, size(ref.array,1))
+a = zeros(size(ref.array))
+newrefs = map(xs, ys) do x, y
+    newxs = collect(x:(x + sf -1)); newys =  collect(y:(y + sf-1))
+    newxs = newxs[newxs .< 700]; newys = newys[newys .< 1250]
+    newrefs = ref.array[newxs, newys][1:end]
+    return newrefs
+end
+a[vcat(newrefs...)] .= 1
+heatmap(a)
+
+identify_clusters!(a)
+heatmap(a)
+
+for i in unique(a[vcat(newrefs...)])
+    findall(a .== i)
+    
+end
+
+# Function to create clusters from percolated grid
+function identify_clusters!(M::AbstractMatrix)
+  dimension=size(M)
+  # Begin cluster count
+  count=1
+  # Loop through each grid square in M
+  for x in 1:dimension[1]
+    for y in 1:dimension[2]
+
+      # If square is marked as 1, then apply cluster finding algorithm
+      if M[x,y]==1.0
+        # Find neighbours of M at this location
+        neighbours=get_neighbours(M, x, y, 8)
+        # Find out if any of the neighbours also have a value of 1, thus, have
+        # not been assigned a cluster yet
+        cluster = vcat(mapslices(x->M[x[1],x[2]] .== 1, neighbours, dims=2)...)
+        # Find out if any of the neighbours have a value > 1, thus, have already
+        # been assigned a cluster
+        already=vcat(mapslices(x->M[x[1],x[2]] .> 1, neighbours, dims=2)...)
+        # If any already assigned neighbours, then assign the grid square to this
+        # same type
+          if any(already)
+            neighbours=neighbours[already,:]
+            M[x,y]=M[neighbours[1,1],neighbours[1,2]]
+          # If none are assigned yet, then create a new cluster
+          else
+            count=count+1
+            neighbours=neighbours[cluster,:]
+            M[x,y]=count
+            map(i->M[neighbours[i,1],neighbours[i,2]]=count, 1:size(neighbours,1))
+        end
+      end
+    end
+  end
+end
