@@ -71,6 +71,36 @@ function readLC(file::String, GB::Bool=true)
     return LandCover(lc)
 end
 
+function readCrop(file::String)
+    xmin = 0; xmax = 7e5; ymin = 0; ymax = 1.3e6
+    txy = [Float64, Int64(1), Int64(1), Float64(1)]
+    #
+    read(file) do dataset
+        #txy[1] = AG.getdatatype(AG.getband(dataset, 1))
+        txy[2] = AG.width(AG.getband(dataset, 1))
+        txy[3] = AG.height(AG.getband(dataset, 1))
+        txy[4] = AG.getnodatavalue(AG.getband(dataset, 1))
+        print(dataset)
+    end
+
+    a = Array{txy[1], 2}(undef, txy[2], txy[3])
+    read(file) do dataset
+        bd = AG.getband(dataset, 1);
+        AG.read!(bd, a);
+    end;
+    lat, long = size(a, 1), size(a, 2);
+    step = abs(xmin - xmax) / lat;
+    latitude = (xmin+ step):step:xmax
+    longitude = (ymin+ step):step:ymax
+    size(longitude)
+    lc = AxisArray(a[:, end:-1:1], Axis{:easting}(latitude * m), Axis{:northing}(longitude * m));
+
+    if txy[1] <: AbstractFloat
+        lc[lc .== lc[1]] *= NaN;
+    end;
+    return LandCover(lc)
+end
+
 """
     readHadUK(file::String)
 
