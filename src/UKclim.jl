@@ -7,7 +7,7 @@ include("ClimateTypes.jl")
 export HadUK
 
 include("Read.jl")
-export readHadUK, readLC, readPlantATT, readNPMS
+export readHadUK, readLC, readPlantATT, readNPMS, readCrop
 
 include("Tools.jl")
 export OSGR_eastnorth, extractvalues, createRef, LC2015cats, startingArray

@@ -81,3 +81,43 @@ end
     xticks := :all
     lcnames, Int.(values(lc))[order]
 end
+
+"""
+    CropCover <: AbstractClimate
+
+Type that houses data extracted from CEH crop cover 2017 rasters.
+"""
+mutable struct CropCover <: AbstractClimate
+    array::AxisArray
+    function CropCover(array::AxisArray)
+        length(size(array)) == 2 ||
+            error("Landcover is two-dimensional")
+        new(array)
+    end
+end
+
+@recipe function f(cc::CropCover)
+    color := [:salmon, :red, :seagreen, :chartreuse, :yellow, :lightblue, :royalblue, :tan, :wheat, :darkorange,  :orange4]
+    background_color   := :lightblue
+    background_color_outside := :white
+    grid := false
+    aspect_ratio := 1
+    seriestype  :=  :heatmap
+    transpose(cc.array)
+end
+@recipe function f(cc::Dict)
+    order = sortperm(Float64.(keys(lc)))
+    ccnames = [CC2017cats[x] for x in Float64.(keys(cc))[order]]
+    colorder = Float64.(keys(cc))[order]
+    colorder[end] = 22
+    color := [:salmon, :red, :seagreen, :chartreuse, :yellow, :lightblue, :royalblue, :tan, :wheat, :darkorange,  :orange4][Int.(colorder)]
+    grid := false
+    seriestype  :=  :bar
+    legend := false
+    size := (1400, 1000)
+    xrotation := 55
+    guidefontsize := 12
+    tickfontsize := 12
+    xticks := :all
+    ccnames, Int.(values(cc))[order]
+end

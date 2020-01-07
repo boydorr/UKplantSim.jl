@@ -50,6 +50,7 @@ function createRef(gridsize::Unitful.Length{Float64}, xmin, xmax, ymin, ymax)
 end
 
 LC2015cats = Dict(1.0 => "Broadleaved woodland", 2.0 => "Coniferous woodland", 3.0 => "Arable and horticulture", 4.0 => "Improved grassland", 5.0 => "Neutral grassland", 6.0 => "Calcareous grassland", 7.0 => "Acid grassland", 8.0 => "Fen, marsh and swamp", 9.0 => "Heather", 10.0 => "Heather grassland", 11.0 => "Bog", 12.0 => "Inland rock", 13.0 => "Saltwater", 14.0 => "Freshwater", 15.0 => "Supra-littoral rock", 16.0 => "Supra-littoral sediment", 17.0 => "Littoral rock", 18.0 => "Littoral sediment", 19.0 => "Saltmarsh", 20.0 => "Urban", 21.0 => "Suburban", NaN => "Unknown")
+CC2017cats = Dict(1.0 => "Beet", 2.0 => "Field beans", 3.0 => "Grass", 4.0 => "Maize", 5.0 => "Oilseed rape", 6.0 => "Other crops", 7.0 => "Potatoes", 8.0 => "Spring barley", 9.0 => "Spring wheat", 10.0 => "Winter barley", 11.0 => "Winter wheat")
 
 function startingArray(uk::JuliaDB.DIndexedTable, numspecies::Int64)
     ref = createRef(1000.0m, 500.0m, 7e5m, 500.0m, 1.25e6m)

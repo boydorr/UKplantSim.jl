@@ -98,7 +98,7 @@ function readCrop(file::String)
     if txy[1] <: AbstractFloat
         lc[lc .== lc[1]] *= NaN;
     end;
-    return LandCover(lc)
+    return CropCover(lc)
 end
 
 """
