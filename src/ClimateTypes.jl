@@ -4,6 +4,7 @@ using RecipesBase
 
 import ClimatePref.AbstractClimate
 import AxisArrays.axes
+import Plots.cgrad
 """
     HadUK <: AbstractClimate
 
