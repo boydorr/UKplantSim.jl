@@ -113,58 +113,66 @@ function startingArray(bsbi::JuliaDB.DIndexedTable, numspecies::Int64, sf::Int64
 end
 
 
-refs = select(filter(g-> g.SppID == ids[1], grouped_tab), :refval)
-xs,ys = convert_coords(refs, size(ref.array,1))
-a = zeros(size(ref.array))
-newrefs = map(xs, ys) do x, y
-    newxs = collect(x:(x + sf -1)); newys =  collect(y:(y + sf-1))
-    newxs = newxs[newxs .< 700]; newys = newys[newys .< 1250]
-    newrefs = ref.array[newxs, newys][1:end]
-    return newrefs
+
+function startingArray1(bsbi::JuliaDB.IndexedTable, numspecies::Int64, sf::Int64)
+    ref = createRef(1000.0m, 500.0m, 7e5m, 500.0m, 1.25e6m)
+    fillarray = Array{Int64, 2}(undef, numspecies, length(ref.array))
+    grouped_tab = @groupby bsbi (:SppID, :refval) {count = length(:refid)}
+    ids = sort(unique(collect(select(bsbi, :SppID))))
+    dict = Dict(zip(ids, 1:length(ids)))
+    #sppnames = [dict[x] for x in collect(select(grouped_tab, :SppID))]
+    #refs = collect(select(grouped_tab, :refval))
+    #counts = collect(select(grouped_tab, :count))
+    Threads.@threads for i in ids
+        probarray = find_probs(grouped_tab, ref, sf, i)
+        multi = rand(Multinomial(Int(sum(probarray .> 0) * 1e3), probarray[1:end]))
+        fillarray[dict[i], :] .= multi[1:end]
+    end
+    return fillarray
 end
-a[vcat(newrefs...)] .= 1
-heatmap(a)
 
-identify_clusters!(a)
-heatmap(a)
 
-for i in unique(a[vcat(newrefs...)])
-    findall(a .== i)
-    
+function find_probs(grouped_tab::JuliaDB.IndexedTable, ref::Reference, sf::Int64, spp::Int64)
+    clustarray = zeros(size(ref.array))
+    probarray = zeros(size(ref.array))
+    refs = select(filter(g-> g.SppID == spp, grouped_tab), :refval)
+    xs,ys = convert_coords(refs, size(ref.array,1))
+    newrefs = map(xs, ys) do x, y
+        newxs = collect(x:(x + sf -1)); newys =  collect(y:(y + sf-1))
+        newxs = newxs[newxs .< 700]; newys = newys[newys .< 1250]
+        newrefs = ref.array[newxs, newys][1:end]
+        return newrefs
+    end
+    clustarray[vcat(newrefs...)] .= 1
+    identify_clusters!(clustarray)
+
+    for i in unique(clustarray[vcat(newrefs...)])
+        clust = findall(clustarray .== i)
+        minX =  minimum(map(x-> x[1], clust))
+        maxX =  maximum(map(x-> x[1], clust))
+        minY =  minimum(map(y-> y[2], clust))
+        maxY =  maximum(map(y-> y[2], clust))
+        mvnorm = MvNormal([mean([maxX, minX]), mean([maxY, minY])], [maxX-minX 1.0; 1.0 maxY-minY])
+        probarray[clust] .= map(x -> pdf(mvnorm, [x[1], x[2]]), clust)
+    end
+    return probarray./sum(probarray)
 end
 
 # Function to create clusters from percolated grid
 function identify_clusters!(M::AbstractMatrix)
-  dimension=size(M)
-  # Begin cluster count
-  count=1
-  # Loop through each grid square in M
-  for x in 1:dimension[1]
-    for y in 1:dimension[2]
-
-      # If square is marked as 1, then apply cluster finding algorithm
-      if M[x,y]==1.0
+    dimension=size(M)
+    # Begin cluster count
+    active = findall(M .> 0)
+    # Loop through each grid square in M
+    for i in active
         # Find neighbours of M at this location
-        neighbours=get_neighbours(M, x, y, 8)
-        # Find out if any of the neighbours also have a value of 1, thus, have
-        # not been assigned a cluster yet
-        cluster = vcat(mapslices(x->M[x[1],x[2]] .== 1, neighbours, dims=2)...)
-        # Find out if any of the neighbours have a value > 1, thus, have already
-        # been assigned a cluster
-        already=vcat(mapslices(x->M[x[1],x[2]] .> 1, neighbours, dims=2)...)
-        # If any already assigned neighbours, then assign the grid square to this
-        # same type
-          if any(already)
-            neighbours=neighbours[already,:]
-            M[x,y]=M[neighbours[1,1],neighbours[1,2]]
-          # If none are assigned yet, then create a new cluster
-          else
-            count=count+1
-            neighbours=neighbours[cluster,:]
-            M[x,y]=count
-            map(i->M[neighbours[i,1],neighbours[i,2]]=count, 1:size(neighbours,1))
+        neighbours=get_neighbours(M, i[1], i[2], 8)
+        inds = convert_coords(neighbours[:,1], neighbours[:,2], size(M,1))
+        already = M[inds] .> 1
+        if any(already)
+            M[i] = M[neighbours[already,1][1], neighbours[already,2][1]]
+        else
+            M[i] = maximum(M) + 1
         end
-      end
     end
-  end
 end
