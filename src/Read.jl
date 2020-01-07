@@ -72,7 +72,7 @@ function readLC(file::String, GB::Bool=true)
 end
 
 function readCrop(file::String)
-    xmin = 0; xmax = 7e5; ymin = 0; ymax = 1.3e6
+    xmin = 0; xmax = 7e5; ymin = 0; ymax = 1.25e6
     txy = [Float64, Int64(1), Int64(1), Float64(1)]
     #
     read(file) do dataset
