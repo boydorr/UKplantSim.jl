@@ -56,7 +56,7 @@ mutable struct LandCover <: AbstractClimate
 end
 
 @recipe function f(lc::LandCover)
-    color := [:red2,:chartreuse4, :red4, :chartreuse, :lightgreen, :yellowgreen, :gold4, :yellow, :darkmagenta, :lightpink,  :seagreen, :lavender, :navy, :blue, :gold3,:gold3, :khaki1, :khaki1, :lightslateblue, :black, :grey]
+    color := cgrad([:red2,:chartreuse4, :red4, :chartreuse, :lightgreen, :yellowgreen, :gold4, :yellow, :darkmagenta, :lightpink,  :seagreen, :lavender, :navy, :blue, :gold3,:gold3, :khaki1, :khaki1, :lightslateblue, :black, :grey])
     background_color   := :lightblue
     background_color_outside := :white
     grid := false
@@ -70,7 +70,7 @@ end
     lcnames = [LC2015cats[x] for x in Float64.(keys(lc))[order]]
     colorder = Float64.(keys(lc))[order]
     colorder[end] = 22
-    color := [:red2,:chartreuse4, :red4, :chartreuse, :lightgreen, :yellowgreen, :gold4, :yellow, :darkmagenta, :lightpink,  :seagreen, :lavender, :navy, :blue, :gold3,:gold3, :khaki1, :khaki1, :lightslateblue, :black, :grey, :white][Int.(colorder)]
+    color := cgrad([:red2,:chartreuse4, :red4, :chartreuse, :lightgreen, :yellowgreen, :gold4, :yellow, :darkmagenta, :lightpink,  :seagreen, :lavender, :navy, :blue, :gold3,:gold3, :khaki1, :khaki1, :lightslateblue, :black, :grey, :white][Int.(colorder)])
     grid := false
     seriestype  :=  :bar
     legend := false
@@ -97,7 +97,7 @@ mutable struct CropCover <: AbstractClimate
 end
 
 @recipe function f(cc::CropCover)
-    color := [:salmon, :red, :seagreen, :chartreuse, :yellow, :lightblue, :royalblue, :tan, :wheat, :darkorange,  :orange4]
+    color := cgrad([:grey, :salmon, :red, :seagreen, :chartreuse, :yellow, :lightblue, :royalblue, :tan, :wheat, :darkorange,  :orange4])
     background_color   := :lightblue
     background_color_outside := :white
     grid := false
@@ -106,11 +106,11 @@ end
     transpose(cc.array)
 end
 @recipe function f(cc::Dict)
-    order = sortperm(Float64.(keys(lc)))
+    order = sortperm(Float64.(keys(cc)))
     ccnames = [CC2017cats[x] for x in Float64.(keys(cc))[order]]
     colorder = Float64.(keys(cc))[order]
     colorder[end] = 22
-    color := [:salmon, :red, :seagreen, :chartreuse, :yellow, :lightblue, :royalblue, :tan, :wheat, :darkorange,  :orange4][Int.(colorder)]
+    color := cgrad([:grey, :salmon, :red, :seagreen, :chartreuse, :yellow, :lightblue, :royalblue, :tan, :wheat, :darkorange,  :orange4][Int.(colorder)])
     grid := false
     seriestype  :=  :bar
     legend := false
