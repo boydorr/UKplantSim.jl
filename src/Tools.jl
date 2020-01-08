@@ -159,8 +159,10 @@ function find_probs!(grouped_tab::JuliaDB.IndexedTable, ref::Reference, probarra
         H = [maxX-minX 1.0; 1.0 maxY-minY]
         if !isposdef(H) H = [maxX-minX 0.5; 0.5 maxY-minY] end
         mvnorm = MvNormal([mean([maxX, minX]), mean([maxY, minY])], H)
-        probarray[clust] .= (map(x -> pdf(mvnorm, [x[1], x[2]]), clust) ./ length(clust))
+        probarray[clust] .= (map(x -> pdf(mvnorm, [x[1], x[2]]), clust) .* length(clust))
     end
+    probarray ./= sum(probarray)
+    probarray[probarray .> 0.1] .= 0.1
     probarray ./= sum(probarray)
 end
 
