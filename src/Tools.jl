@@ -126,18 +126,20 @@ function startingArray1(bsbi::JuliaDB.IndexedTable, numspecies::Int64, sf::Int64
     #sppnames = [dict[x] for x in collect(select(grouped_tab, :SppID))]
     #refs = collect(select(grouped_tab, :refval))
     #counts = collect(select(grouped_tab, :count))
-    Threads.@threads for i in ids
-        probarray = find_probs(grouped_tab, ref, sf, i)
+    clustarray = zeros(size(ref.array))
+    probarray = zeros(size(ref.array))
+    for i in ids
+        find_probs!(grouped_tab, ref, probarray, clustarray, sf, i)
         multi = rand(Multinomial(Int(sum(probarray .> 0) * 1e3), probarray[1:end]))
         fillarray[dict[i], :] .= multi[1:end]
+        clustarray .= 0; probarray .= 0
+        print(i, "\n")
     end
     return fillarray
 end
 
 
-function find_probs(grouped_tab::JuliaDB.IndexedTable, ref::Reference, sf::Int64, spp::Int64)
-    clustarray = zeros(size(ref.array))
-    probarray = zeros(size(ref.array))
+function find_probs!(grouped_tab::JuliaDB.IndexedTable, ref::Reference, probarray::Matrix{Float64}, clustarray::Matrix{Float64}, sf::Int64, spp::Int64)
     refs = select(filter(g-> g.SppID == spp, grouped_tab), :refval)
     xs,ys = convert_coords(refs, size(ref.array,1))
     newrefs = map(xs, ys) do x, y
@@ -148,17 +150,18 @@ function find_probs(grouped_tab::JuliaDB.IndexedTable, ref::Reference, sf::Int64
     end
     clustarray[vcat(newrefs...)] .= 1
     identify_clusters!(clustarray)
-
     for i in unique(clustarray[vcat(newrefs...)])
         clust = findall(clustarray .== i)
         minX =  minimum(map(x-> x[1], clust))
-        maxX =  maximum(map(x-> x[1], clust))
+        maxX =  maximum(map(x-> x[1], clust)) + 1
         minY =  minimum(map(y-> y[2], clust))
-        maxY =  maximum(map(y-> y[2], clust))
-        mvnorm = MvNormal([mean([maxX, minX]), mean([maxY, minY])], [maxX-minX 1.0; 1.0 maxY-minY])
-        probarray[clust] .= map(x -> pdf(mvnorm, [x[1], x[2]]), clust)
+        maxY =  maximum(map(y-> y[2], clust)) + 1
+        H = [maxX-minX 1.0; 1.0 maxY-minY]
+        if !isposdef(H) H = [maxX-minX 0.5; 0.5 maxY-minY] end
+        mvnorm = MvNormal([mean([maxX, minX]), mean([maxY, minY])], H)
+        probarray[clust] .= (map(x -> pdf(mvnorm, [x[1], x[2]]), clust) ./ length(clust))
     end
-    return probarray./sum(probarray)
+    probarray ./= sum(probarray)
 end
 
 # Function to create clusters from percolated grid
@@ -167,7 +170,7 @@ function identify_clusters!(M::AbstractMatrix)
     # Begin cluster count
     active = findall(M .> 0)
     # Loop through each grid square in M
-    for i in active
+    Threads.@threads for i in active
         # Find neighbours of M at this location
         neighbours=get_neighbours(M, i[1], i[2], 8)
         inds = convert_coords(neighbours[:,1], neighbours[:,2], size(M,1))
