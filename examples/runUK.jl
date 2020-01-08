@@ -211,8 +211,7 @@ rel2 = Gauss{eltype(ae.habitat.h2)}()
 rel = multiplicativeTR2(rel1, rel2)
 eco = Ecosystem(emptypopulate!, sppl, ae, rel)
 
-bsbi = distribute(bsbi, 1)
-start = startingArray(bsbi, length(traits), 10)
+start = startingArray1(bsbi, length(traits), 10)
 eco.abundances.matrix .+= start
 
 abun = norm_sub_alpha(Metacommunity(start), 0.0)[:diversity]
@@ -270,3 +269,26 @@ abun[isnan.(abun)] .= 0
 abun[.!active] .= NaN
 heatmap(transpose(abun), background_color = :lightblue, background_color_outside = :white, grid = false, color = :algae, aspect_ratio = 1)
 Plots.pdf("BSBI_decade4.pdf")
+
+
+
+times = collect(2008year:1month:2017year+11month)
+dir = "HadUK/sun/"
+sun = readHadUK(dir, "sun", times)
+active = Array{Bool, 2}(.!isnan.(sun.array[:, :, 1]))
+
+# After one decade
+abun = JLD.load("StartArray.jld", "start")
+abun = norm_sub_alpha(Metacommunity(abun), 0.0)[:diversity]
+abun = reshape(abun, 700, 1250)
+abun[isnan.(abun)] .= 0
+abun[.!active] .= NaN
+heatmap(transpose(abun), background_color = :lightblue, background_color_outside = :white, grid = false, color = :algae, aspect_ratio = 1)
+Plots.pdf("StartRichness.pdf")
+
+abun = JLD.load("StartArray.jld", "start")
+abun = reshape(abun[1543,:], 700, 1250)
+abun *= 1.0
+abun[.!active] .= NaN
+heatmap(transpose(abun), background_color = :lightblue, background_color_outside = :white, grid = false, color = :algae, aspect_ratio = 1)
+Plots.pdf("StartAbun.pdf")
