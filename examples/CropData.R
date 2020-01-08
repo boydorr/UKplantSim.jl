@@ -9,12 +9,12 @@ print(fc_list)
 fc <- readOGR(dsn=fgdb,layer="crop_map_2017")
 fc@data
 mode_func <- function(x, na.rm){
-  as.factor(names(which.max(table(x))))
+  as.numeric(names(which.max(table(x))))
 }
 
-library(tidyverse)
-fc_agg = aggregate(fc, by= "crop_code", dissolve = T)
+fc@data$cc <- as.numeric(fc@data$crop_code)
 
 library(raster)
-r <- raster(extent(fc), res= c(1000,1000))
-rr <- rasterize(fc, r, field = "crop_code", fun = mode_func)
+r <- raster(extent(c(0, 7e5, 0, 1.25e6)), res= c(1000,1000))
+rr <- rasterize(fc, r, field = "cc", fun = mode_func)
+writeRaster(rr, "~/Documents/PhD/GIT/UKclim/data/Crop2017", format = "GTiff", overwrite = T)
