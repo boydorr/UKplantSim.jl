@@ -57,7 +57,7 @@ mutable struct LandCover <: AbstractClimate
 end
 
 @recipe function f(lc::LandCover)
-    color := cgrad([:red2,:chartreuse4, :red4, :chartreuse, :lightgreen, :yellowgreen, :gold4, :yellow, :darkmagenta, :lightpink,  :seagreen, :lavender, :navy, :blue, :gold3,:gold3, :khaki1, :khaki1, :lightslateblue, :black, :grey])
+    color := cgrad([:red2,:chartreuse4, :red4, :chartreuse, :lightgreen, :yellowgreen, :gold4, :yellow, :darkmagenta, :lightpink,  :seagreen, :lavender, :navy, :blue, :gold3,:gold3, :khaki1, :khaki1, :lightslateblue, :black, :grey, :salmon, :red, :seagreen, :chartreuse, :yellow, :lightblue, :royalblue, :tan, :wheat, :darkorange,  :orange4])
     background_color   := :lightblue
     background_color_outside := :white
     grid := false
@@ -71,7 +71,7 @@ end
     lcnames = [LC2015cats[x] for x in Float64.(keys(lc))[order]]
     colorder = Float64.(keys(lc))[order]
     colorder[end] = 22
-    color := cgrad([:red2,:chartreuse4, :red4, :chartreuse, :lightgreen, :yellowgreen, :gold4, :yellow, :darkmagenta, :lightpink,  :seagreen, :lavender, :navy, :blue, :gold3,:gold3, :khaki1, :khaki1, :lightslateblue, :black, :grey, :white][Int.(colorder)])
+    color := cgrad([:red2,:chartreuse4, :red4, :chartreuse, :lightgreen, :yellowgreen, :gold4, :yellow, :darkmagenta, :lightpink,  :seagreen, :lavender, :navy, :blue, :gold3,:gold3, :khaki1, :khaki1, :lightslateblue, :black, :grey, :white, :salmon, :red, :seagreen, :chartreuse, :yellow, :lightblue, :royalblue, :tan, :wheat, :darkorange,  :orange4][Int.(colorder)])
     grid := false
     seriestype  :=  :bar
     legend := false
