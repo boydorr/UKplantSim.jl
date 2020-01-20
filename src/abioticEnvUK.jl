@@ -2,7 +2,7 @@ using Simulation
 using Unitful
 using Unitful.DefaultSymbols
 using MyUnitful
-import Simulation: matchdict, cancel, HabitatUpdate, NoChange, eraChange, AbstractBudget, checkbud
+import Simulation: matchdict, cancel, HabitatUpdate, NoChange, eraChange, AbstractBudget, checkbud, _habitatupdate!
 
 function lcAE(lc::LandCover, maxbud::Unitful.Quantity{Float64}, area::Unitful.Area)
     lc = LandCover(lc.array[:, 0.0m .. 1.25e6m])
@@ -82,4 +82,10 @@ function hadAE(had::HadUK, bud::B, active::Array{Bool, 2}) where {B <: AbstractB
         HabitatUpdate{Unitful.Dimensions{()}}(eraChange, 0.0/s))
 
      return GridAbioticEnv{typeof(hab), SolarTimeBudget}(hab, active, bud)
+end
+
+function _habitatupdate!(eco::Ecosystem, hab::HabitatCollection3, timestep::Unitful.Time)
+    _habitatupdate!(eco, hab.h1, timestep)
+    _habitatupdate!(eco, hab.h2, timestep)
+    _habitatupdate!(eco, hab.h3, timestep)
 end
