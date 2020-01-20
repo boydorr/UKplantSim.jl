@@ -1,5 +1,6 @@
 using Simulation
-import Simulation: AbstractTraitRelationship, AbstractTraits
+import Simulation: AbstractTraitRelationship, AbstractTraits, iscontinuous
+import Base.eltype
 
 mutable struct LCmatch{TR} <: AbstractTraitRelationship{TR}
 end

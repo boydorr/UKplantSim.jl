@@ -5,8 +5,10 @@ using MyUnitful
 import Simulation: matchdict, cancel, HabitatUpdate, NoChange, eraChange, AbstractBudget, checkbud
 
 function lcAE(lc::LandCover, maxbud::Unitful.Quantity{Float64}, area::Unitful.Area)
+    lc = LandCover(lc.array[:, 0.0m .. 1.25e6m])
     dimension = size(lc.array)
     gridsquaresize = lc.array.axes[1].val[2] - lc.array.axes[1].val[1]
+    gridsquaresize = uconvert(km, gridsquaresize)
     active = fill(true, dimension)
     active[isnan.(lc.array[:,:,1])] .= false
 
@@ -20,10 +22,11 @@ function lcAE(lc::LandCover, maxbud::Unitful.Quantity{Float64}, area::Unitful.Ar
      return GridAbioticEnv{typeof(hab), budtype}(hab, active, budtype(bud))
 end
 function lcAE(lc::LandCover, maxbud::Unitful.Quantity{Float64}, active::Array{Bool, 2})
+    lc = LandCover(lc.array[:, 0.0m .. 1.25e6m])
     dimension = size(lc.array)[1:2]
     gridsquaresize = lc.array.axes[1].val[2] - lc.array.axes[1].val[1]
-    gridsquaresize = ustrip.(gridsquaresize) * 111.32km
-    hab = DiscreteHab(Array(lc.array), 1, gridsquaresize,
+    gridsquaresize = uconvert(km, gridsquaresize)
+    hab = DiscreteHab(Array(lc.array), gridsquaresize,
         HabitatUpdate{Unitful.Dimensions{()}}(NoChange, 0.0/s))
     B = cancel(maxbud, area)
     bud = zeros(typeof(B), dimension)
@@ -33,10 +36,11 @@ function lcAE(lc::LandCover, maxbud::Unitful.Quantity{Float64}, active::Array{Bo
      return GridAbioticEnv{typeof(hab), budtype}(hab, active, budtype(bud))
 end
 function lcAE(lc::LandCover, bud::SolarTimeBudget, active::Array{Bool, 2})
+    lc = LandCover(lc.array[:, 0.0m .. 1.25e6m])
     dimension = size(lc.array)[1:2]
     gridsquaresize = lc.array.axes[1].val[2] - lc.array.axes[1].val[1]
-    gridsquaresize = ustrip.(gridsquaresize) * 111.32km
-    hab = DiscreteHab(Array(lc.array), 1, gridsquaresize,
+    gridsquaresize = uconvert(km, gridsquaresize)
+    hab = DiscreteHab(Array(lc.array), gridsquaresize,
         HabitatUpdate{Unitful.Dimensions{()}}(NoChange, 0.0/s))
 
      return GridAbioticEnv{typeof(hab), SolarTimeBudget}(hab, active, bud)
