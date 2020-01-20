@@ -1,5 +1,5 @@
 using Simulation
-import Simulation.AbstractTraitRelationship, AbstractTraits
+import Simulation: AbstractTraitRelationship, AbstractTraits
 
 mutable struct LCmatch{TR} <: AbstractTraitRelationship{TR}
 end
