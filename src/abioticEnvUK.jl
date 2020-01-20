@@ -2,7 +2,7 @@ using Simulation
 using Unitful
 using Unitful.DefaultSymbols
 using MyUnitful
-import Simulation: matchdict, cancel, HabitatUpdate, NoChange, eraChange, AbstractBudget
+import Simulation: matchdict, cancel, HabitatUpdate, NoChange, eraChange, AbstractBudget, checkbud
 
 function lcAE(lc::LandCover, maxbud::Unitful.Quantity{Float64}, area::Unitful.Area)
     dimension = size(lc.array)
@@ -10,7 +10,7 @@ function lcAE(lc::LandCover, maxbud::Unitful.Quantity{Float64}, area::Unitful.Ar
     active = fill(true, dimension)
     active[isnan.(lc.array[:,:,1])] .= false
 
-    hab = ContinuousHab(Array(lc.array), gridsquaresize,
+    hab = DiscreteHab(Array(lc.array), gridsquaresize,
         HabitatUpdate{Unitful.Dimensions{()}}(NoChange, 0.0/s))
     B = cancel(maxbud, area)
     bud = zeros(typeof(B), dimension)
@@ -20,11 +20,11 @@ function lcAE(lc::LandCover, maxbud::Unitful.Quantity{Float64}, area::Unitful.Ar
      return GridAbioticEnv{typeof(hab), budtype}(hab, active, budtype(bud))
 end
 function lcAE(lc::LandCover, maxbud::Unitful.Quantity{Float64}, active::Array{Bool, 2})
-    dimension = size(era.array)[1:2]
-    gridsquaresize = era.array.axes[1].val[2] - era.array.axes[1].val[1]
+    dimension = size(lc.array)[1:2]
+    gridsquaresize = lc.array.axes[1].val[2] - lc.array.axes[1].val[1]
     gridsquaresize = ustrip.(gridsquaresize) * 111.32km
-    hab = ContinuousTimeHab(Array(era.array), 1, gridsquaresize,
-        HabitatUpdate{Unitful.Dimensions{()}}(eraChange, 0.0/s))
+    hab = DiscreteHab(Array(lc.array), 1, gridsquaresize,
+        HabitatUpdate{Unitful.Dimensions{()}}(NoChange, 0.0/s))
     B = cancel(maxbud, area)
     bud = zeros(typeof(B), dimension)
     fill!(bud, B/(dimension[1]*dimension[2]))
@@ -33,11 +33,11 @@ function lcAE(lc::LandCover, maxbud::Unitful.Quantity{Float64}, active::Array{Bo
      return GridAbioticEnv{typeof(hab), budtype}(hab, active, budtype(bud))
 end
 function lcAE(lc::LandCover, bud::SolarTimeBudget, active::Array{Bool, 2})
-    dimension = size(era.array)[1:2]
-    gridsquaresize = era.array.axes[1].val[2] - era.array.axes[1].val[1]
+    dimension = size(lc.array)[1:2]
+    gridsquaresize = lc.array.axes[1].val[2] - lc.array.axes[1].val[1]
     gridsquaresize = ustrip.(gridsquaresize) * 111.32km
-    hab = ContinuousTimeHab(Array(era.array), 1, gridsquaresize,
-        HabitatUpdate{Unitful.Dimensions{()}}(eraChange, 0.0/s))
+    hab = DiscreteHab(Array(lc.array), 1, gridsquaresize,
+        HabitatUpdate{Unitful.Dimensions{()}}(NoChange, 0.0/s))
 
      return GridAbioticEnv{typeof(hab), SolarTimeBudget}(hab, active, bud)
 end
