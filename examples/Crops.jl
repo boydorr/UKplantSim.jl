@@ -101,3 +101,25 @@ trt_stds = map(1:11) do i
 end
 trt_stds = hcat(trt_stds...)
 JLD.save("Crop_trait_stds.jld", "trt_stds", trt_stds)
+
+
+locs = findall(newlc.array .== (22))
+beet_means = [namean(meantas2015[locs]), namean(meanrainfall2015[locs]), namean(meansun2015[locs])]
+beet_stds = [nastd(meantas2015[locs]), nastd(meanrainfall2015[locs]), nastd(meansun2015[locs])]
+
+locs = findall((newlc.array .== 29) .| (newlc.array .== 31))
+barley_means = [namean(meantas2015[locs]), namean(meanrainfall2015[locs]), namean(meansun2015[locs])]
+barley_stds = [nastd(meantas2015[locs]), nastd(meanrainfall2015[locs]), nastd(meansun2015[locs])]
+
+
+traits = JuliaDB.load("BSBI_had_prefs_UK")
+traits = filter(t-> !isnan(t.sun) & !isnan(t.rainfall) & !isnan(t.tas_st) & !isnan(t.rain_st), traits)
+traits = filter(t -> (t.rain_st > 0) & (t.tas_st > 0), traits)
+
+push!(rows(traits), (NAME = "Beta vulgaris", tas = beet_means[1], rainfall = beet_means[2], sun = beet_means[3], tas_st = beet_stds[1], rain_st = beet_stds[2]))
+push!(rows(traits), (NAME = "Hordeum vulgare", tas = barley_means[1], rainfall = barley_means[2], sun = barley_means[3], tas_st = barley_stds[1], rain_st = barley_stds[2]))
+table(traits, pkey = :NAME, copy = false)
+JuliaDB.save(traits, "Crop_had_prefs_UK")
+
+crop_names = ["Beta vulgaris", "Vicia faba", "Grass", "Zea mays", "Brassica napus", "Other", "Solanum tuberosum", "Hordeum vulgare", "Triticum aestivum", "Hordeum vulgare", "Triticum aestivum"]
+cropids = [findall(x .== select(traits, :NAME)) for x in crop_names]
