@@ -71,3 +71,33 @@ abun[isnan.(abun)] .= 0
 abun[.!active] .= NaN
 heatmap(transpose(abun), background_color = :lightblue, background_color_outside = :white, grid = false, color = :algae, aspect_ratio = 1)
 Plots.pdf("StartCropDiv.pdf")
+
+using JLD
+dir = "HadUK/tas/"
+times = collect(2008year:1month:2017year+11month)
+tas = readHadUK(dir, "tas", times)
+dir = "HadUK/rainfall/"
+rainfall = readHadUK(dir, "rainfall", times)
+dir = "HadUK/sun/"
+sun = readHadUK(dir, "sun", times)
+
+# Take means of 2015 (same as for LC)
+meantas2015 = mapslices(mean, tas.array[:, :, 2015year..2015year+11months]./K, dims = 3)[:, :, 1]
+meanrainfall2015 = mapslices(mean, rainfall.array[:, :, 2015year..2015year+11months]./mm, dims = 3)[:, :, 1]
+meansun2015 = mapslices(mean, (uconvert.(kJ, 1km^2 .* sun.array[:, :, 2015year..2015year+11months] .* 1000*(W/m^2)))./kJ, dims = 3)[:, :, 1]
+namean(x) = mean(x[.!isnan.(x)])
+nastd(x) = std(x[.!isnan.(x)])
+
+trt_means = map(1:11) do i
+    locs = findall(newlc.array .== (i+21))
+    return [namean(meantas2015[locs]), namean(meanrainfall2015[locs]), namean(meansun2015[locs])]
+end
+trt_means = hcat(trt_means...)
+JLD.save("Crop_trait_means.jld", "trt_means", trt_means)
+
+trt_stds = map(1:11) do i
+    locs = findall(newlc.array .== (i+21))
+    return [nastd(meantas2015[locs]), nastd(meanrainfall2015[locs]), nastd(meansun2015[locs])]
+end
+trt_stds = hcat(trt_stds...)
+JLD.save("Crop_trait_stds.jld", "trt_stds", trt_stds)
