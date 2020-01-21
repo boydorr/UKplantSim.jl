@@ -14,6 +14,7 @@ using Statistics
 using Simulation
 using Distributions
 using Diversity
+using JLD
 using Plots
 gr()
 
@@ -211,7 +212,8 @@ rel2 = Gauss{eltype(ae.habitat.h2)}()
 rel = multiplicativeTR2(rel1, rel2)
 eco = Ecosystem(emptypopulate!, sppl, ae, rel)
 
-start = startingArray1(bsbi, length(traits), 10)
+#start = startingArray1(bsbi, length(traits), 10)
+start = JLD.load("StartArray2.jld", "start")
 eco.abundances.matrix .+= start
 
 abun = norm_sub_alpha(Metacommunity(start), 0.0)[:diversity]
@@ -222,6 +224,7 @@ heatmap(transpose(abun), background_color = :lightblue, background_color_outside
 grid = false, color = :algae, aspect_ratio = 1)
 
 simulate!(eco, 10years, 1month)
+JLD.save("BSBI_abun_gauss.jld", "abun", eco.abundances.matrix)
 
 # PLot results
 cd("/home/claireh/Documents/UK")
@@ -277,7 +280,6 @@ dir = "HadUK/sun/"
 sun = readHadUK(dir, "sun", times)
 active = Array{Bool, 2}(.!isnan.(sun.array[:, :, 1]))
 
-# After one decade
 abun = JLD.load("StartArray.jld", "start")
 abun = norm_sub_alpha(Metacommunity(abun), 0.0)[:diversity]
 abun = reshape(abun, 700, 1250)
@@ -286,9 +288,26 @@ abun[.!active] .= NaN
 heatmap(transpose(abun), background_color = :lightblue, background_color_outside = :white, grid = false, color = :algae, aspect_ratio = 1)
 Plots.pdf("StartRichness.pdf")
 
-abun = JLD.load("StartArray.jld", "start")
+abun = JLD.load("StartArray2.jld", "start")
+abun = norm_sub_alpha(Metacommunity(abun), 0.0)[:diversity]
+abun = reshape(abun, 700, 1250)
+abun[isnan.(abun)] .= 0
+abun[.!active] .= NaN
+heatmap(transpose(abun), background_color = :lightblue, background_color_outside = :white, grid = false, color = :algae, aspect_ratio = 1)
+Plots.pdf("StartRichness2.pdf")
+
+abun = JLD.load("StartArray2.jld", "start")
 abun = reshape(abun[1543,:], 700, 1250)
 abun *= 1.0
 abun[.!active] .= NaN
 heatmap(transpose(abun), background_color = :lightblue, background_color_outside = :white, grid = false, color = :algae, aspect_ratio = 1)
-Plots.pdf("StartAbun.pdf")
+Plots.pdf("StartAbun2.pdf")
+
+
+abun = JLD.load("BSBI_abun_gauss.jld", "abun")
+abun = norm_sub_alpha(Metacommunity(abun), 0.0)[:diversity]
+abun = reshape(abun, 700, 1250)
+abun[isnan.(abun)] .= 0
+abun[.!active] .= NaN
+heatmap(transpose(abun), background_color = :lightblue, background_color_outside = :white, grid = false, color = :algae, aspect_ratio = 1)
+Plots.pdf("BSBI_gauss.pdf")
