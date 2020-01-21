@@ -184,3 +184,13 @@ function identify_clusters!(M::AbstractMatrix)
         end
     end
 end
+
+
+function combineLC(lc::LandCover, cc::CropCover)
+    lc = lc.array[:, 0m .. 1.25e6m]
+    cropland = findall(cc.array .> 0)
+    agland = findall(lc .== 3)
+    inter = agland ∩ cropland
+    lc[inter] += (cc.array[inter] .+ 18)
+    return LandCover(lc)
+end
