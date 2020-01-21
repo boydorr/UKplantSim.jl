@@ -73,3 +73,7 @@ bsbi = @transform bsbi {tas = mean(meantas2015[:cr]), rainfall = mean(meanrainfa
 bsbi_counts = collect(@groupby bsbi :NAME {tas = namean(:tas), rainfall = namean(:rainfall), sun = namean(:sun), tas_st = nastd(:tas), rain_st = nastd(:rainfall)})
 bsbi_counts = collect(bsbi_counts)
 save(bsbi_counts, "BSBI_had_prefs_UK")
+
+lc = readLC("CEH_landcover_2015.tif")
+bsbi = @transform bsbi {lc = lc.array[:refval]}
+LC_counts = @groupby bsbi :Scientific_name {lc = :lc}
