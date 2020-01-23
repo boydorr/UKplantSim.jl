@@ -5,6 +5,8 @@ using Unitful
 using JuliaDBMeta
 using JuliaDB
 using Distributions
+using LinearAlgebra
+using Simulation
 
 function OSGR_eastnorth(osgridref::String)
     squares = BritishNationalGrid.square_names()
