@@ -203,7 +203,7 @@ function readUKCP(file::String, param::String, times::Vector{T}, active::String)
     uk = AxisArray(array[:, :, :, 1], Axis{:easting}(lon * m), Axis{:northing}(lat * m), Axis{:month}(times))
     uk = upres(uk, 12)
     uk = uk[1000.0m..7e5m, 1000.0m..1.25e6m, :]
-    active_grid = JLD.load(active, "active") .== 1
+    active_grid = JLD.load(active, "active") .== 0
     uk[active_grid, :] *= NaN
     return UKCP(uk)
 end
