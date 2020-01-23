@@ -41,6 +41,19 @@ mutable struct CHESS <: AbstractClimate
         new(array)
     end
 end
+"""
+    UKCP <: AbstractClimate
+
+Type that houses data extracted from UKCP18 netcdf files.
+"""
+mutable struct UKCP <: AbstractClimate
+    array::AxisArray
+    function UKCP(array::AxisArray)
+        typeof(collect(axes(array, 3).val)[1])<: Unitful.Time ||
+            error("Third dimension of array must be time")
+        new(array)
+    end
+end
 
 """
     LandCover <: AbstractClimate
