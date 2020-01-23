@@ -241,19 +241,18 @@ rel3 = LCmatch{eltype(ae.habitat.h3)}()
 rel = multiplicativeTR3(rel1, rel2, rel3)
 eco = Ecosystem(emptypopulate!, sppl, ae, rel)
 
-start = startingArray1(bsbi, length(traits), 10)
-JLD.save("StartArrayCrop.jld", "start", start)
+# start = startingArray1(bsbi, length(traits), 10)
+# JLD.save("StartArrayCrop.jld", "start", start)
 
-start = JLD.load("StartArray2.jld", "start")
+start = JLD.load("StartArrayCrop.jld", "start")
 start = reshape(start, size(start, 1), 700, 1250)
-ag = findall(newlc.array .== 3)
+ag = findall((newlc.array .== 3) .| (newlc.array .> 21))
 start[:, ag] .= 0
 for i in eachindex(cropids)
     locs = vcat([findall(newlc.array .== x) for x in lctrait[cropids[i]]]...)
-    crops[cropids[i], locs] .= 1e3
+    start[cropids[i], locs] .= 1e3
 end
-start = cat(start, crops, dims = 1)
 eco.abundances.matrix .+= reshape(start, size(start, 1), 700 * 1250)
 
 simulate!(eco, 20years, 1month)
-JLD.save("BSBI_abun_crop.jld", "abun", eco.abundances.matrix)
+JLD.save("BSBI_abun_crop2.jld", "abun", eco.abundances.matrix)
