@@ -159,7 +159,7 @@ end
 
 Function to import UKCP18 data into Julia from particular parameter.
 """
-function readUKCP(file::String, param::String, times::Vector{T})
+function readUKCP(file::String, param::String, times::Vector{T}) where T <: Unitful.Time
     lat = ncread(file, "projection_y_coordinate")
     lon = ncread(file, "projection_x_coordinate")
     units = ncgetatt(file, param, "units")
