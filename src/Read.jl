@@ -8,9 +8,10 @@ using JuliaDB
 import Unitful.°, Unitful.°C, Unitful.mm
 import ArchGDAL
 import Base.read
+import ClimatePref.upresolution
 const AG = ArchGDAL
 
-unitdict = Dict("K" => K, "m" => m, "J m**-2" => J/m^2, "m**3 m**-3" => m^3, "degC" => °C, "mm" => mm, "hour" => u"hr", "kg m-2 s-1" => kg/(m^2*s))
+unitdict = Dict("K" => K, "m" => m, "J m**-2" => J/m^2, "m**3 m**-3" => m^3, "degC" => °C, "mm" => mm, "hour" => u"hr", "kg m-2 s-1" => kg/(m^2*s), "mm/day" => mm/day)
 
 """
     searchdir(path,key)
@@ -153,6 +154,56 @@ function readCHESS(dir::String, param::String, times::Vector{T}) where T<: Unitf
     return CHESS(uk[0.0m..1e6m, 0.0m..1.25e6m, :])
 end
 
+"""
+    readUKCP(file::String)
+
+Function to import UKCP18 data into Julia from particular parameter.
+"""
+function readUKCP(file::String, param::String, times::Vector{T})
+    lat = ncread(file, "projection_y_coordinate")
+    lon = ncread(file, "projection_x_coordinate")
+    units = ncgetatt(file, param, "units")
+    units = unitdict[units]
+    array = ncread(file, param)
+    array[array .≈ ncgetatt(file, param, "_FillValue")] .= NaN
+    addarray = zeros(Float64, 82, 2, 1200, 1)
+    array = cat(array, addarray, dims = 2)
+    array = array * 1.0 * units
+    append!(lat, [lat[end] + 12000.0, lat[end] + 24000.0])
+
+    # If temperature param, need to convert from Kelvin
+    if typeof(units) <: Unitful.TemperatureUnits
+        array = uconvert.(K, array)
+    end
+    uk = AxisArray(array[:, :, :, 1], Axis{:easting}(lon * m), Axis{:northing}(lat * m), Axis{:month}(times))
+    uk = upresolution(uk, 12)
+    return UKCP(uk[1000.0m..7e5m, 1000.0m..1.25e6m, :])
+end
+
+function upresolution(aa::AxisArray{T, 3} where T, rescale::Int64)
+    grid = size(aa)
+    grid = (grid[1] .* rescale, grid[2] .* rescale, grid[3])
+    array = Array{typeof(aa[1]), 3}(undef, grid)
+    map(1:grid[3]) do time
+        for x in 1:size(aa, 1)
+            for y in 1:size(aa, 2)
+        array[(rescale*x-(rescale-1)):(rescale*x),
+            (rescale*y-(rescale - 1)):(rescale*y), time] .= aa[x, y, time]
+            end
+        end
+    end
+    lon = aa.axes[1].val
+    step = lon[2] - lon[1]
+    smallstep = (lon[2] - lon[1]) / rescale
+    newlon = collect(lon[1]+smallstep:smallstep:(lon[end]+step))
+    lat = aa.axes[2].val
+    smallstep = (lat[2] - lat[1]) / rescale
+    newlat = collect(lat[1]+smallstep:smallstep:(lat[end]+step))
+    return AxisArray(array,
+        Axis{:longitude}(newlon),
+        Axis{:latitude}(newlat),
+        Axis{:time}(aa.axes[3].val))
+end
 
 """
     readPlantATT(file::String)
