@@ -256,3 +256,24 @@ eco.abundances.matrix .+= reshape(start, size(start, 1), 700 * 1250)
 
 simulate!(eco, 20years, 1month)
 JLD.save("BSBI_abun_crop2.jld", "abun", eco.abundances.matrix)
+
+# PLot results
+cd("/home/claireh/Documents/UK")
+using Diversity
+using UKclim
+using MyUnitful
+using JLD
+using Plots
+gr()
+times = collect(2008year:1month:2017year+11month)
+dir = "HadUK/sun/"
+sun = readHadUK(dir, "sun", times)
+active = Array{Bool, 2}(.!isnan.(sun.array[:, :, 1]))
+
+abun = JLD.load("BSBI_abun_crop2.jld", "abun")
+abun = norm_sub_alpha(Metacommunity(abun), 0.0)[:diversity]
+abun = reshape(abun, 700, 1250)
+abun[isnan.(abun)] .= 0
+abun[.!active] .= NaN
+heatmap(transpose(abun), background_color = :lightblue, background_color_outside = :white, grid = false, color = :algae, aspect_ratio = 1)
+Plots.pdf("BSBI_crop.pdf")
