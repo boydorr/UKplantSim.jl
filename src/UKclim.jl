@@ -1,7 +1,7 @@
 module UKclim
 
-include("extractHadUK.jl")
-export retrieve_HadUK
+#include("extractHadUK.jl")
+#export retrieve_HadUK
 
 include("ClimateTypes.jl")
 export HadUK, LandCover, CropCover

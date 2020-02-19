@@ -1,5 +1,6 @@
 julia 0.6-
 Simulation
+JLD
 Unitful
 MyUnitful
 ClimatePref
@@ -11,3 +12,4 @@ JuliaDB
 JuliaDBMeta
 ArchGDAL
 BritishNationalGrid
+Plots
