@@ -56,70 +56,70 @@ CC2017cats = Dict(1.0 => "Beet", 2.0 => "Field beans", 3.0 => "Grass", 4.0 => "M
 
 LC2015cats = Dict(1.0 => "Broadleaved woodland", 2.0 => "Coniferous woodland", 3.0 => "Arable and horticulture", 4.0 => "Improved grassland", 5.0 => "Neutral grassland", 6.0 => "Calcareous grassland", 7.0 => "Acid grassland", 8.0 => "Fen, marsh and swamp", 9.0 => "Heather", 10.0 => "Heather grassland", 11.0 => "Bog", 12.0 => "Inland rock", 13.0 => "Saltwater", 14.0 => "Freshwater", 15.0 => "Supra-littoral rock", 16.0 => "Supra-littoral sediment", 17.0 => "Littoral rock", 18.0 => "Littoral sediment", 19.0 => "Saltmarsh", 20.0 => "Urban", 21.0 => "Suburban", NaN => "Unknown", 22.0 => "Beet", 23.0 => "Field beans", 24.0 => "Grass", 25.0 => "Maize", 26.0 => "Oilseed rape", 27.0 => "Other crops", 28.0 => "Potatoes", 29.0 => "Spring barley", 30.0 => "Spring wheat", 31.0 => "Winter barley", 32.0 => "Winter wheat")
 
-function startingArray(uk::JuliaDB.DIndexedTable, numspecies::Int64)
-    ref = createRef(1000.0m, 500.0m, 7e5m, 500.0m, 1.25e6m)
-    fillarray = Array{Int64, 2}(undef, numspecies, length(ref.array))
-    grouped_tab = @groupby uk (:SppID, :refval) {count = length(:refid)}
-    ids = sort(unique(collect(select(uk, :SppID))))
-    dict = Dict(zip(ids, 1:length(ids)))
-    sppnames = [dict[x] for x in collect(select(grouped_tab, :SppID))]
-    refs = collect(select(grouped_tab, :refval))
-    counts = collect(select(grouped_tab, :count))
-    map(1:length(counts)) do i
-        fillarray[sppnames[i], refs[i]] = counts[i] .* 1e3
-    end
-    return fillarray
-end
+# function startingArray(uk::JuliaDB.DIndexedTable, numspecies::Int64)
+#     ref = createRef(1000.0m, 500.0m, 7e5m, 500.0m, 1.25e6m)
+#     fillarray = Array{Int64, 2}(undef, numspecies, length(ref.array))
+#     grouped_tab = @groupby uk (:SppID, :refval) {count = length(:refid)}
+#     ids = sort(unique(collect(select(uk, :SppID))))
+#     dict = Dict(zip(ids, 1:length(ids)))
+#     sppnames = [dict[x] for x in collect(select(grouped_tab, :SppID))]
+#     refs = collect(select(grouped_tab, :refval))
+#     counts = collect(select(grouped_tab, :count))
+#     map(1:length(counts)) do i
+#         fillarray[sppnames[i], refs[i]] = counts[i] .* 1e3
+#     end
+#     return fillarray
+# end
+#
+# function startingArray(bsbi::JuliaDB.DIndexedTable, numspecies::Int64, sf::Int64)
+#     ref = createRef(1000.0m, 500.0m, 7e5m, 500.0m, 1.25e6m)
+#     fillarray = Array{Int64, 2}(undef, numspecies, length(ref.array))
+#     grouped_tab = @groupby bsbi (:SppID, :refval) {count = length(:refid)}
+#     ids = sort(unique(collect(select(bsbi, :SppID))))
+#     dict = Dict(zip(ids, 1:length(ids)))
+#     sppnames = [dict[x] for x in collect(select(grouped_tab, :SppID))]
+#     refs = collect(select(grouped_tab, :refval))
+#     counts = collect(select(grouped_tab, :count))
+#     map(1:length(counts)) do i
+#         x, y = convert_coords(refs[i], size(ref.array, 1))
+#         xs = collect(x:(x + sf -1)); ys =  collect(y:(y + sf-1))
+#         xs = xs[xs .< 700]; ys = ys[ys .< 1250]
+#         newrefs = ref.array[xs, ys][1:end]
+#         fillarray[sppnames[i], newrefs] .= rand(Multinomial(Int64(counts[i] .* 1e3), length(newrefs)))
+#     end
+#     return fillarray
+# end
+# function count_neighbours(j::Int64, refs::Vector{Int64}, ref::Reference)
+#     x,y = Simulation.convert_coords(j, size(ref.array, 1))
+#     neighbours = Simulation.get_neighbours(Array(ref.array), x, y, 8)
+#     inds = map((x,y) -> ref.array[x, y], neighbours[:,1], neighbours[:,2])
+#     return length(inds ∩ newrefs)
+# end
 
-function startingArray(bsbi::JuliaDB.DIndexedTable, numspecies::Int64, sf::Int64)
-    ref = createRef(1000.0m, 500.0m, 7e5m, 500.0m, 1.25e6m)
-    fillarray = Array{Int64, 2}(undef, numspecies, length(ref.array))
-    grouped_tab = @groupby bsbi (:SppID, :refval) {count = length(:refid)}
-    ids = sort(unique(collect(select(bsbi, :SppID))))
-    dict = Dict(zip(ids, 1:length(ids)))
-    sppnames = [dict[x] for x in collect(select(grouped_tab, :SppID))]
-    refs = collect(select(grouped_tab, :refval))
-    counts = collect(select(grouped_tab, :count))
-    map(1:length(counts)) do i
-        x, y = convert_coords(refs[i], size(ref.array, 1))
-        xs = collect(x:(x + sf -1)); ys =  collect(y:(y + sf-1))
-        xs = xs[xs .< 700]; ys = ys[ys .< 1250]
-        newrefs = ref.array[xs, ys][1:end]
-        fillarray[sppnames[i], newrefs] .= rand(Multinomial(Int64(counts[i] .* 1e3), length(newrefs)))
-    end
-    return fillarray
-end
-function count_neighbours(j::Int64, refs::Vector{Int64}, ref::Reference)
-    x,y = Simulation.convert_coords(j, size(ref.array, 1))
-    neighbours = Simulation.get_neighbours(Array(ref.array), x, y, 8)
-    inds = map((x,y) -> ref.array[x, y], neighbours[:,1], neighbours[:,2])
-    return length(inds ∩ newrefs)
-end
-
-function startingArray(bsbi::JuliaDB.DIndexedTable, numspecies::Int64, sf::Int64)
-    ref = createRef(1000.0m, 500.0m, 7e5m, 500.0m, 1.25e6m)
-    fillarray = Array{Int64, 2}(undef, numspecies, length(ref.array))
-    grouped_tab = @groupby bsbi (:SppID, :refval) {count = length(:refid)}
-    ids = sort(unique(collect(select(bsbi, :SppID))))
-    dict = Dict(zip(ids, 1:length(ids)))
-    sppnames = [dict[x] for x in collect(select(grouped_tab, :SppID))]
-    refs = collect(select(grouped_tab, :refval))
-    counts = collect(select(grouped_tab, :count))
-    map(1:length(counts)) do i
-        x, y = convert_coords(refs[i], size(ref.array, 1))
-        xs = collect(x:(x + sf -1)); ys =  collect(y:(y + sf-1))
-        xs = xs[xs .< 700]; ys = ys[ys .< 1250]
-        newrefs = ref.array[xs, ys][1:end]
-        prob = map(j -> count_neighbours(j, Array(newrefs), ref), newrefs)
-        if sum(prob) == 0 prob .= 1/length(prob) end
-        fillarray[sppnames[i], newrefs] .= rand(Multinomial(Int64(counts[i] .* 1e3), prob./sum(prob)))
-    end
-    return fillarray
-end
+# function startingArray(bsbi::JuliaDB.DIndexedTable, numspecies::Int64, sf::Int64)
+#     ref = createRef(1000.0m, 500.0m, 7e5m, 500.0m, 1.25e6m)
+#     fillarray = Array{Int64, 2}(undef, numspecies, length(ref.array))
+#     grouped_tab = @groupby bsbi (:SppID, :refval) {count = length(:refid)}
+#     ids = sort(unique(collect(select(bsbi, :SppID))))
+#     dict = Dict(zip(ids, 1:length(ids)))
+#     sppnames = [dict[x] for x in collect(select(grouped_tab, :SppID))]
+#     refs = collect(select(grouped_tab, :refval))
+#     counts = collect(select(grouped_tab, :count))
+#     map(1:length(counts)) do i
+#         x, y = convert_coords(refs[i], size(ref.array, 1))
+#         xs = collect(x:(x + sf -1)); ys =  collect(y:(y + sf-1))
+#         xs = xs[xs .< 700]; ys = ys[ys .< 1250]
+#         newrefs = ref.array[xs, ys][1:end]
+#         prob = map(j -> count_neighbours(j, Array(newrefs), ref), newrefs)
+#         if sum(prob) == 0 prob .= 1/length(prob) end
+#         fillarray[sppnames[i], newrefs] .= rand(Multinomial(Int64(counts[i] .* 1e3), prob./sum(prob)))
+#     end
+#     return fillarray
+# end
 
 
 
-function startingArray1(bsbi::JuliaDB.IndexedTable, numspecies::Int64, sf::Int64)
+function startingArray(bsbi::JuliaDB.IndexedTable, numspecies::Int64, sf::Int64)
     ref = createRef(1000.0m, 500.0m, 7e5m, 500.0m, 1.25e6m)
     fillarray = Array{Int64, 2}(undef, numspecies, length(ref.array))
     grouped_tab = @groupby bsbi (:SppID, :refval) {count = length(:refid)}

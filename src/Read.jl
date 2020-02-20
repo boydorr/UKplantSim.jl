@@ -8,30 +8,11 @@ using JLD
 
 import Unitful.°, Unitful.°C, Unitful.mm
 import ArchGDAL
-import Base.read
+import ClimatePref.read
+import ClimatePref.searchdir
 const AG = ArchGDAL
 
 unitdict = Dict("K" => K, "m" => m, "J m**-2" => J/m^2, "m**3 m**-3" => m^3, "degC" => °C, "mm" => mm, "hour" => u"hr", "kg m-2 s-1" => kg/(m^2*s), "mm/day" => mm/day)
-
-"""
-    searchdir(path,key)
-
-Function to search a directory `path` using a given `key` string.
-"""
-searchdir(path,key) = filter(x->occursin(key, x), readdir(path))
-
-"""
-    read(f, filename)
-
-Function to read raster file into julia.
-"""
-function read(f, filename)
-    return AG.environment() do
-        AG.read(filename) do dataset
-            f(dataset)
-        end
-    end
-end
 
 """
     readlc(file::String)
