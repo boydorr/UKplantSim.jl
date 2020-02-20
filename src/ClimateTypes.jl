@@ -119,19 +119,19 @@ end
     seriestype  :=  :heatmap
     transpose(cc.array)
 end
-@recipe function f(cc::Dict)
-    order = sortperm(Float64.(keys(cc)))
-    ccnames = [CC2017cats[x] for x in Float64.(keys(cc))[order]]
-    colorder = Float64.(keys(cc))[order]
-    colorder[end] = 22
-    color := cgrad([:grey, :salmon, :red, :seagreen, :chartreuse, :yellow, :lightblue, :royalblue, :tan, :wheat, :darkorange,  :orange4][Int.(colorder)])
-    grid := false
-    seriestype  :=  :bar
-    legend := false
-    size := (1400, 1000)
-    xrotation := 55
-    guidefontsize := 12
-    tickfontsize := 12
-    xticks := :all
-    ccnames, Int.(values(cc))[order]
-end
+# @recipe function f(cc::Dict)
+#     order = sortperm(Float64.(keys(cc)))
+#     ccnames = [CC2017cats[x] for x in Float64.(keys(cc))[order]]
+#     colorder = Float64.(keys(cc))[order]
+#     colorder[end] = 22
+#     color := cgrad([:grey, :salmon, :red, :seagreen, :chartreuse, :yellow, :lightblue, :royalblue, :tan, :wheat, :darkorange,  :orange4][Int.(colorder)])
+#     grid := false
+#     seriestype  :=  :bar
+#     legend := false
+#     size := (1400, 1000)
+#     xrotation := 55
+#     guidefontsize := 12
+#     tickfontsize := 12
+#     xticks := :all
+#     ccnames, Int.(values(cc))[order]
+# end
