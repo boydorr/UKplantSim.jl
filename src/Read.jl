@@ -208,3 +208,38 @@ Function to import National Plant Monitoring Scheme data as a JuliaDB table.
 function readNPMS(file::String)
     return loadtable(file)
 end
+
+"""
+    readSoils(file::String)
+
+Function to read in Hutton soil data from file.
+"""
+function readSoils(file::String)
+    xmin = 0; xmax = 7e5; ymin = 0; ymax = 1.25e6
+    txy = [Float64, Int64(1), Int64(1), Float64(1)]
+    #
+    read(file) do dataset
+        #txy[1] = AG.getdatatype(AG.getband(dataset, 1))
+        txy[2] = AG.width(AG.getband(dataset, 1))
+        txy[3] = AG.height(AG.getband(dataset, 1))
+        txy[4] = AG.getnodatavalue(AG.getband(dataset, 1))
+        print(dataset)
+    end
+
+    a = Array{txy[1], 2}(undef, txy[2], txy[3])
+    read(file) do dataset
+        bd = AG.getband(dataset, 1);
+        AG.read!(bd, a);
+    end;
+    lat, long = size(a, 1), size(a, 2);
+    step = abs(xmin - xmax) / lat;
+    latitude = (xmin+ step):step:xmax
+    longitude = (ymin+ step):step:ymax
+    size(longitude)
+    soils = AxisArray(a[:, end:-1:1], Axis{:easting}(latitude * m), Axis{:northing}(longitude * m));
+
+    if txy[1] <: AbstractFloat
+        soils[soils .== soils[1]] *= NaN;
+    end;
+    return Soils(soils)
+end

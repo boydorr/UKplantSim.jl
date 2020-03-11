@@ -135,3 +135,17 @@ end
 #     xticks := :all
 #     ccnames, Int.(values(cc))[order]
 # end
+
+"""
+    Soils <: AbstractClimate
+
+Type that houses data extracted from Hutton soil rasters.
+"""
+mutable struct Soils <: AbstractClimate
+    array::AxisArray
+    function Soils(array::AxisArray)
+        length(size(array)) == 2 ||
+            error("Soil cover is two-dimensional")
+        new(array)
+    end
+end
