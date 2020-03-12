@@ -196,3 +196,12 @@ function combineLC(lc::LandCover, cc::CropCover)
     lc[inter] += (cc.array[inter] .+ 18)
     return LandCover(lc)
 end
+
+
+function coarsenRef(refval::Int64, width::Int64, sf::Int64)
+    ref = createRef(1000.0m, 500.0m, 7e5m, 500.0m, 1.25e6m)
+    x, y = convert_coords(refval, size(ref.array, 1))
+    xs = collect(x:(x + sf -1)); ys =  collect(y:(y + sf-1))
+    xs = xs[xs .< 700]; ys = ys[ys .< 1250]
+    return ref.array[xs, ys][1:end]
+end
