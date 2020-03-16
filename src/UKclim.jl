@@ -14,7 +14,7 @@ export OSGR_eastnorth, extractvalues, createRef, LC2015cats, CC2017cats,
     startingArray, combineLC, coarsenRef
 
 include("abioticEnvUK.jl")
-export lcAE, hadAE
+export lcAE, hadAE, soilAE
 
 include("traitsUK.jl")
 export LCmatch, LCtrait
