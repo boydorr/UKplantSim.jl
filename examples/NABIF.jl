@@ -19,18 +19,18 @@ squares = loadtable("plantdata/PlantData_Squares.txt")
 bsbi = join(bsbi, squares, lkey = :OS_SQUARE, rkey = :OS_SQUARE)
 bsbi = join(bsbi, species, lkey = :TAXONNO, rkey = :TAXONNO)
 bsbi = @transform bsbi {SppID = :TAXONNO}
+bsbi = distribute(bsbi, 12)
 
 pa = readPlantATT("PLANTATT_19_Nov_08.csv")
 
-spp_bsbi = unique(select(bsbi, :NAME))
-spp_pa = select(pa, :Taxon_name)
+spp_bsbi = unique(collect(select(bsbi, :NAME)))
+spp_pa = collect(select(pa, :Taxon_name))
 cross_species = spp_bsbi ∩ spp_pa
 bsbi = filter(b -> b.NAME ∈ cross_species, bsbi)
 
 ref = createRef(1000.0m, 500.0m, 7e5m, 500.0m, 1.25e6m)
 bsbi = @transform bsbi {refval = UKclim.extractvalues(:EAST * m, :NORTH * m, ref), refid = 1}
 
-bsbi = distribute(bsbi, 12)
 start = startingArray(bsbi, length(species), 10)
 
 abun = norm_sub_alpha(Metacommunity(start), 0.0)[:diversity]
@@ -41,20 +41,13 @@ heatmap(transpose(abun), background_color = :lightblue, background_color_outside
 grid = false, color = :algae, aspect_ratio = 1)
 
 
-function coarsenRef(refval::Int64, width::Int64, sf::Int64)
-    ref = createRef(1000.0m, 500.0m, 7e5m, 500.0m, 1.25e6m)
-    x, y = convert_coords(refval, size(ref.array, 1))
-    xs = collect(x:(x + sf -1)); ys =  collect(y:(y + sf-1))
-    xs = xs[xs .< 700]; ys = ys[ys .< 1250]
-    return ref.array[xs, ys][1:end]
-end
 bsbi = @transform bsbi {cr = coarsenRef(:refval, 700, 10)}
 
 @everywhere namean(x) = mean(x[.!isnan.(x)])
 @everywhere nastd(x) = std(x[.!isnan.(x)])
 @everywhere using Statistics
 dir = "HadUK/tas/"
-times = collect(2010year:1month:2017year+11month)
+times = collect(2008year:1month:2017year+11month)
 tas = readHadUK(dir, "tas", times)
 dir = "HadUK/rainfall/"
 rainfall = readHadUK(dir, "rainfall", times)
@@ -71,9 +64,17 @@ bsbi = @transform bsbi {tas = mean(meantas2015[:cr]), rainfall = mean(meanrainfa
 
 # Calculate averages per species and plot as histogram
 bsbi_counts = collect(@groupby bsbi :NAME {tas = namean(:tas), rainfall = namean(:rainfall), sun = namean(:sun), tas_st = nastd(:tas), rain_st = nastd(:rainfall)})
-bsbi_counts = collect(bsbi_counts)
 save(bsbi_counts, "BSBI_had_prefs_UK")
 
 lc = readLC("CEH_landcover_2015.tif")
 bsbi = @transform bsbi {lc = lc.array[:refval]}
-LC_counts = @groupby bsbi :Scientific_name {lc = :lc}
+LC_counts = collect(@groupby bsbi :NAME {lc = [sum(:lc .== i) for i in 1:21]})
+save(LC_counts, "BSBI_lc_prefs_uk")
+
+save(bsbi, "BSBI_prefs_UK")
+
+soils = readSoils("HuttonSoils.tif")
+bsbi = @transform bsbi {soil = soils.array[:refval]}
+soil_counts = collect(@groupby bsbi :NAME {soil = unique(:soil)})
+soil_counts = @where soil_counts !all(isnan.(:soil))
+save(soil_counts, "BSBI_soil_prefs_uk")

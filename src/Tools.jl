@@ -8,6 +8,11 @@ using Distributions
 using LinearAlgebra
 using Simulation
 
+"""
+    OSGR_eastnorth(osgridref::String)
+
+Function to convert between OS grid references and easting/northing
+"""
 function OSGR_eastnorth(osgridref::String)
     squares = BritishNationalGrid.square_names()
     startingref = findall(osgridref[1:2] .== squares)
@@ -16,6 +21,11 @@ function OSGR_eastnorth(osgridref::String)
     [easting, northing]
 end
 
+"""
+    extractvalues(x::Vector{L},y::Vector{L}, ref::Reference) where L <: Unitful.Length
+
+Function to extract values at specific x,y locations from a `Reference` type of grid.
+"""
 function extractvalues(x::Vector{L},y::Vector{L}, ref::Reference) where L <: Unitful.Length
     all(x .<= 7e5m) && all(x .>= 0.0m) ||
     error("X coordinate is out of bounds")
@@ -39,9 +49,9 @@ function extractvalues(x::L, y::L, ref::Reference) where L <: Unitful.Length
 end
 
 """
-    create_reference(gridsize::Float64, xmin, xmax, ymin, ymax)
+    createRef(gridsize::Unitful.Length{Float64}, xmin, xmax, ymin, ymax)
 
-Function to create a reference grid array of type `Reference`.
+Function to create a reference grid array of type `Reference` with specific x and y bounds.
 """
 function createRef(gridsize::Unitful.Length{Float64}, xmin, xmax, ymin, ymax)
     x = length(xmin:gridsize:xmax)
@@ -118,7 +128,14 @@ LC2015cats = Dict(1.0 => "Broadleaved woodland", 2.0 => "Coniferous woodland", 3
 # end
 
 
+"""
+    startingArray(bsbi::JuliaDB.IndexedTable, numspecies::Int64, sf::Int64)
 
+Function to create a grid of starting abundances for ecosystem simulation.
+This takes in BSBI locations for a specified number of species `numspecies `
+and coarsening factor `sf` for the number of grid squares the abundances should
+be spread across.
+"""
 function startingArray(bsbi::JuliaDB.IndexedTable, numspecies::Int64, sf::Int64)
     ref = createRef(1000.0m, 500.0m, 7e5m, 500.0m, 1.25e6m)
     fillarray = Array{Int64, 2}(undef, numspecies, length(ref.array))
@@ -140,7 +157,11 @@ function startingArray(bsbi::JuliaDB.IndexedTable, numspecies::Int64, sf::Int64)
     return fillarray
 end
 
+"""
+    find_probs!(grouped_tab::JuliaDB.IndexedTable, ref::Reference, probarray::Matrix{Float64}, clustarray::Matrix{Float64}, sf::Int64, spp::Int64)
 
+Function to find probability of abundance across 
+"""
 function find_probs!(grouped_tab::JuliaDB.IndexedTable, ref::Reference, probarray::Matrix{Float64}, clustarray::Matrix{Float64}, sf::Int64, spp::Int64)
     refs = select(filter(g-> g.SppID == spp, grouped_tab), :refval)
     xs,ys = convert_coords(refs, size(ref.array,1))
