@@ -136,8 +136,8 @@ This takes in BSBI locations for a specified number of species `numspecies `
 and coarsening factor `sf` for the number of grid squares the abundances should
 be spread across.
 """
-function startingArray(bsbi::JuliaDB.IndexedTable, numspecies::Int64, sf::Int64)
-    ref = createRef(1000.0m, 500.0m, 7e5m, 500.0m, 1.25e6m)
+function startingArray(bsbi::JuliaDB.IndexedTable, numspecies::Int64, sf::Int64, res::Unitful.Length{Float64} = 1000.0m, xmin::Unitful.Length{Float64} = 500.0m, xmax::Unitful.Length{Float64} = 7e5m, ymin::Unitful.Length{Float64} = 500.0m, ymax::Unitful.Length{Float64} = 1.25e6m)
+    ref = createRef(res, xmin, xmax, ymin, ymax)
     fillarray = Array{Int64, 2}(undef, numspecies, length(ref.array))
     grouped_tab = @groupby bsbi (:SppID, :refval) {count = length(:refid)}
     ids = sort(unique(collect(select(bsbi, :SppID))))
