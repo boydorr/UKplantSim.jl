@@ -160,11 +160,11 @@ end
 """
     find_probs!(grouped_tab::JuliaDB.IndexedTable, ref::Reference, probarray::Matrix{Float64}, clustarray::Matrix{Float64}, sf::Int64, spp::Int64)
 
-Function to find probability of abundance across 
+Function to find probability of abundance across
 """
 function find_probs!(grouped_tab::JuliaDB.IndexedTable, ref::Reference, probarray::Matrix{Float64}, clustarray::Matrix{Float64}, sf::Int64, spp::Int64)
     refs = select(filter(g-> g.SppID == spp, grouped_tab), :refval)
-    xs,ys = convert_coords(refs, size(ref.array,1))
+    xs,ys = convert_coords.(refs, size(ref.array,1))
     newrefs = map(xs, ys) do x, y
         newxs = collect(x:(x + sf -1)); newys =  collect(y:(y + sf-1))
         newxs = newxs[newxs .< 700]; newys = newys[newys .< 1250]
@@ -198,7 +198,7 @@ function identify_clusters!(M::AbstractMatrix)
     Threads.@threads for i in active
         # Find neighbours of M at this location
         neighbours=get_neighbours(M, i[1], i[2], 8)
-        inds = convert_coords(neighbours[:,1], neighbours[:,2], size(M,1))
+        inds = convert_coords.(neighbours[:,1], neighbours[:,2], size(M,1))
         already = M[inds] .> 1
         if any(already)
             M[i] = M[neighbours[already,1][1], neighbours[already,2][1]]
