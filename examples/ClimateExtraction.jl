@@ -3,9 +3,9 @@ using JuliaDB
 using JuliaDBMeta
 using Unitful
 using Unitful.DefaultSymbols
-using MyUnitful
+using Simulation.Units
 using AxisArrays
-using ClimatePref
+using Simulation.ClimatePref
 using StatsBase
 using Plots
 plotlyjs()
@@ -74,7 +74,7 @@ using JuliaDB
 using JuliaDBMeta
 using BritishNationalGrid
 using Unitful
-using MyUnitful
+using Simulation.Units
 using Unitful.DefaultSymbols
 using AxisArrays
 using Statistics

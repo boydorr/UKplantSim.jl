@@ -4,7 +4,7 @@ using JuliaDB
 using JuliaDBMeta
 using BritishNationalGrid
 using Unitful
-using MyUnitful
+using Simulation.Units
 using Unitful.DefaultSymbols
 using AxisArrays
 using Statistics
@@ -123,7 +123,7 @@ JLD.save("BSBI_lc.jld", "abun")
 cd("/home/claireh/Documents/UK")
 using Diversity
 using UKclim
-using MyUnitful
+using Simulation.Units
 using JLD
 using Plots
 gr()
@@ -261,7 +261,7 @@ JLD.save("BSBI_abun_crop2.jld", "abun", eco.abundances.matrix)
 cd("/home/claireh/Documents/UK")
 using Diversity
 using UKclim
-using MyUnitful
+using Simulation.Units
 using JLD
 using Plots
 gr()

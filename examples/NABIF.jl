@@ -3,7 +3,7 @@ using JuliaDB
 using JuliaDBMeta
 using BritishNationalGrid
 using Unitful
-using MyUnitful
+using Simulation.Units
 using Unitful.DefaultSymbols
 using AxisArrays
 using Statistics
