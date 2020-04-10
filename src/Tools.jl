@@ -164,7 +164,11 @@ Function to find probability of abundance across
 """
 function find_probs!(grouped_tab::JuliaDB.IndexedTable, ref::Reference, probarray::Matrix{Float64}, clustarray::Matrix{Float64}, sf::Int64, spp::Int64)
     refs = select(filter(g-> g.SppID == spp, grouped_tab), :refval)
-    xs,ys = convert_coords.(refs, size(ref.array,1))
+    if length(refs) > 1
+        xs,ys = convert_coords.(refs, size(ref.array,1))
+    else
+        xs, ys = convert_coords.(refs, size(ref.array,1))[1]
+    end
     newrefs = map(xs, ys) do x, y
         newxs = collect(x:(x + sf -1)); newys =  collect(y:(y + sf-1))
         newxs = newxs[newxs .< 700]; newys = newys[newys .< 1250]
