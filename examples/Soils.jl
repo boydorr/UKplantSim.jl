@@ -28,7 +28,7 @@ water = WaterTimeBudget(rain, 1)
 
 bud = BudgetCollection2(sol, water)
 
-active = Array{Bool, 2}(.!isnan.(sun.array[:, :, 1]))
+active = Array{Bool, 2}(.!isnan.(sun.array[:, 5e5m .. 1.25e6m, 1]))
 
 temp = HadUK(tas.array[:, 5e5m .. 1.25e6m, :])
 temp = hadAE(temp, sol, active)
@@ -48,7 +48,8 @@ bsbi = join(bsbi, species, lkey = :TAXONNO, rkey = :TAXONNO)
 bsbi = @transform bsbi {SppID = :TAXONNO}
 
 # Create reference for UK grid
-ref = createRef(1000.0m, 500.0m, 7e5m, 500.0m, 1.25e6m)
+bsbi = filter(b -> b.NORTH * m >= 5e5m, bsbi)
+ref = createRef(1000.0m, 500.0m, 7e5m, 5e5m, 1.25e6m)
 bsbi = @transform bsbi {refval = UKclim.extractvalues(:EAST * m, :NORTH * m, ref), refid = 1}
 
 traits = JuliaDB.load("BSBI_had_prefs_UK")
@@ -104,7 +105,9 @@ rel3 = LCmatch{eltype(ae.habitat.h3)}()
 rel = multiplicativeTR3(rel1, rel2, rel3)
 eco = Ecosystem(emptypopulate!, sppl, ae, rel)
 
-start = startingArray(bsbi, length(traits_whole), 10)
+start = startingArray(bsbi, length(traits_whole), 10, 1000.0m, 500.0m, 7e5m, 5e5m + 500m, 1.25e6m)
+using JLD
+JLD.save("Soil_StartArray.jld", "start", start)
 #start = JLD.load("StartArray2.jld", "start")
 eco.abundances.matrix .+= start
 
