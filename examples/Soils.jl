@@ -7,6 +7,7 @@ using AxisArrays
 using JuliaDB
 using JuliaDBMeta
 using Distributions
+using JLD
 
 # using Plots
 # gr()
@@ -47,22 +48,9 @@ soils = soilAE(soils, sol, active)
 hab = HabitatCollection3(temp.habitat, rain.habitat, soils.habitat)
 ae = GridAbioticEnv{typeof(hab), typeof(bud)}(hab, temp.active, bud, temp.names)
 
-
-bsbi = loadtable("plantdata/PlantData_87to99.txt")
-species = loadtable("plantdata/PlantData_Species.txt")
-squares = loadtable("plantdata/PlantData_Squares.txt")
-bsbi = join(bsbi, squares, lkey = :OS_SQUARE, rkey = :OS_SQUARE)
-bsbi = join(bsbi, species, lkey = :TAXONNO, rkey = :TAXONNO)
-bsbi = @transform bsbi {SppID = :TAXONNO}
-
-# Create reference for UK grid
-ref = createRef(1000.0m, 500.0m, 7e5m, 500.0m, 1.25e6m)
-bsbi = @transform bsbi {refval = UKclim.extractvalues(:EAST * m, :NORTH * m, ref), refid = 1}
-
 traits = JuliaDB.load("BSBI_had_prefs_UK")
 traits = filter(t-> !isnan(t.sun) & !isnan(t.rainfall) & !isnan(t.tas_st) & !isnan(t.rain_st), traits)
 traits = filter(t -> (t.rain_st > 0) & (t.tas_st > 0), traits)
-bsbi = filter(u-> u.NAME in JuliaDB.select(traits, :NAME), bsbi)
 numSpecies = length(traits)
 individuals = Int(1e9)
 
@@ -112,7 +100,8 @@ eco = Ecosystem(emptypopulate!, sppl, ae, rel)
 
 #start = startingArray1(bsbi, length(traits), 10)
 start = JLD.load("StartArray2.jld", "start")
-eco.abundances.matrix .+= start
+start = reshape(start, 1626, 700, 1250)[:, :, 501:1250]
+eco.abundances.matrix .+= reshape(start, 1626, 525000)
 
 simulate!(eco, 20years, 1month)
-JLD.save("BSBI_soil.jld", "abun")
+JLD.save("BSBI_soil.jld", "abun", eco.abundances.matrix)
