@@ -1,7 +1,7 @@
 using Simulation
 using Unitful
 using Unitful.DefaultSymbols
-using MyUnitful
+using Simulation.Units
 import Simulation: matchdict, cancel, HabitatUpdate, NoChange, eraChange, AbstractBudget, checkbud, _habitatupdate!
 
 function lcAE(lc::LandCover, maxbud::Unitful.Quantity{Float64}, area::Unitful.Area)

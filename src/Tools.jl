@@ -1,5 +1,5 @@
 using BritishNationalGrid
-using ClimatePref
+using Simulation.ClimatePref
 using AxisArrays
 using Unitful
 using JuliaDBMeta
@@ -136,8 +136,8 @@ This takes in BSBI locations for a specified number of species `numspecies `
 and coarsening factor `sf` for the number of grid squares the abundances should
 be spread across.
 """
-function startingArray(bsbi::JuliaDB.IndexedTable, numspecies::Int64, sf::Int64)
-    ref = createRef(1000.0m, 500.0m, 7e5m, 500.0m, 1.25e6m)
+function startingArray(bsbi::JuliaDB.IndexedTable, numspecies::Int64, sf::Int64, res::Unitful.Length{Float64} = 1000.0m, xmin::Unitful.Length{Float64} = 500.0m, xmax::Unitful.Length{Float64} = 7e5m, ymin::Unitful.Length{Float64} = 500.0m, ymax::Unitful.Length{Float64} = 1.25e6m)
+    ref = createRef(res, xmin, xmax, ymin, ymax)
     fillarray = Array{Int64, 2}(undef, numspecies, length(ref.array))
     grouped_tab = @groupby bsbi (:SppID, :refval) {count = length(:refid)}
     ids = sort(unique(collect(select(bsbi, :SppID))))
@@ -160,11 +160,15 @@ end
 """
     find_probs!(grouped_tab::JuliaDB.IndexedTable, ref::Reference, probarray::Matrix{Float64}, clustarray::Matrix{Float64}, sf::Int64, spp::Int64)
 
-Function to find probability of abundance across 
+Function to find probability of abundance across
 """
 function find_probs!(grouped_tab::JuliaDB.IndexedTable, ref::Reference, probarray::Matrix{Float64}, clustarray::Matrix{Float64}, sf::Int64, spp::Int64)
     refs = select(filter(g-> g.SppID == spp, grouped_tab), :refval)
-    xs,ys = convert_coords(refs, size(ref.array,1))
+    if length(refs) > 1
+        xs,ys = convert_coords.(refs, size(ref.array,1))
+    else
+        xs, ys = convert_coords.(refs, size(ref.array,1))[1]
+    end
     newrefs = map(xs, ys) do x, y
         newxs = collect(x:(x + sf -1)); newys =  collect(y:(y + sf-1))
         newxs = newxs[newxs .< 700]; newys = newys[newys .< 1250]
@@ -198,7 +202,7 @@ function identify_clusters!(M::AbstractMatrix)
     Threads.@threads for i in active
         # Find neighbours of M at this location
         neighbours=get_neighbours(M, i[1], i[2], 8)
-        inds = convert_coords(neighbours[:,1], neighbours[:,2], size(M,1))
+        inds = convert_coords.(neighbours[:,1], neighbours[:,2], size(M,1))
         already = M[inds] .> 1
         if any(already)
             M[i] = M[neighbours[already,1][1], neighbours[already,2][1]]

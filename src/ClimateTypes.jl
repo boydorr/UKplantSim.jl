@@ -2,7 +2,7 @@ using AxisArrays
 using Unitful
 using RecipesBase
 
-import ClimatePref.AbstractClimate
+import Simulation.ClimatePref.AbstractClimate
 import AxisArrays.axes
 import Plots.cgrad
 """
