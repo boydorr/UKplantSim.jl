@@ -14,7 +14,7 @@ writeRaster(r, "~/Documents/COVID/UK.tif", format = 'GTiff', overwrite = T)
 
 r = raster("~/Documents/COVID/scotland_run/test_scotland_Hosp30.tif")
 plot(r)
-mask = raster("~/Documents/PhD/GIT/Simulation/test/examples/ScotlandDensity2011.tif")
+mask = raster("~/Documents/PhD/GIT/EcoSISTEM/test/examples/ScotlandDensity2011.tif")
 mask = crop(mask, extent(r))
 rnew = mask(r, mask)
 cols <- colorRampPalette(brewer.pal(9,"YlOrRd"))
@@ -56,7 +56,7 @@ library(raster)
 library(rgdal)
 library(ncdf4)
 
-ncfname = "~/Documents/PhD/GIT/Simulation/test/examples/temp/ukv_daily_t1o5m_mean_20200101.nc"
+ncfname = "~/Documents/PhD/GIT/EcoSISTEM/test/examples/temp/ukv_daily_t1o5m_mean_20200101.nc"
 temp = nc_open(ncfname)
 tmpin <- raster(ncfname)
 crs(tmpin) = '+proj=ob_tran +o_proj=longlat +lon_0=357.5 +o_lon_p=0 +o_lat_p=37.5 +a=6371229 +b=6371229 +to_meter=0.0174532925199 +wktext'

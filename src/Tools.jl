@@ -1,12 +1,12 @@
 using BritishNationalGrid
-using Simulation.ClimatePref
+using EcoSISTEM.ClimatePref
 using AxisArrays
 using Unitful
 using JuliaDBMeta
 using JuliaDB
 using Distributions
 using LinearAlgebra
-using Simulation
+using EcoSISTEM
 
 """
     OSGR_eastnorth(osgridref::String)
@@ -100,8 +100,8 @@ LC2015cats = Dict(1.0 => "Broadleaved woodland", 2.0 => "Coniferous woodland", 3
 #     return fillarray
 # end
 # function count_neighbours(j::Int64, refs::Vector{Int64}, ref::Reference)
-#     x,y = Simulation.convert_coords(j, size(ref.array, 1))
-#     neighbours = Simulation.get_neighbours(Array(ref.array), x, y, 8)
+#     x,y = EcoSISTEM.convert_coords(j, size(ref.array, 1))
+#     neighbours = EcoSISTEM.get_neighbours(Array(ref.array), x, y, 8)
 #     inds = map((x,y) -> ref.array[x, y], neighbours[:,1], neighbours[:,2])
 #     return length(inds ∩ newrefs)
 # end

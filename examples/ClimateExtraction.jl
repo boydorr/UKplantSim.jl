@@ -3,12 +3,11 @@ using JuliaDB
 using JuliaDBMeta
 using Unitful
 using Unitful.DefaultSymbols
-using Simulation.Units
+using EcoSISTEM.Units
 using AxisArrays
-using Simulation.ClimatePref
+using EcoSISTEM.ClimatePref
 using StatsBase
 using Plots
-plotlyjs()
 
 # Read in landcover 2015 data
 file = "data/CEH_landcover_2015.tif"
@@ -74,7 +73,7 @@ using JuliaDB
 using JuliaDBMeta
 using BritishNationalGrid
 using Unitful
-using Simulation.Units
+using EcoSISTEM.Units
 using Unitful.DefaultSymbols
 using AxisArrays
 using Statistics

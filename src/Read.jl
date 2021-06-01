@@ -1,6 +1,6 @@
 using Unitful
 using Unitful.DefaultSymbols
-using Simulation.Units
+using EcoSISTEM.Units
 using AxisArrays
 using NetCDF
 using JuliaDB
@@ -8,8 +8,8 @@ using JLD
 
 import Unitful.°, Unitful.°C, Unitful.mm
 import ArchGDAL
-import Simulation.ClimatePref.read
-import Simulation.ClimatePref.searchdir
+import EcoSISTEM.ClimatePref.read
+import EcoSISTEM.ClimatePref.searchdir
 const AG = ArchGDAL
 
 unitdict = Dict("K" => K, "m" => m, "J m**-2" => J/m^2, "m**3 m**-3" => m^3, "degC" => °C, "mm" => mm, "hour" => u"hr", "kg m-2 s-1" => kg/(m^2*s), "mm/day" => mm/day)

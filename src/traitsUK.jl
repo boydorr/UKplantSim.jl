@@ -1,5 +1,5 @@
-using Simulation
-import Simulation: AbstractTraitRelationship, AbstractTraits, iscontinuous, _traitfun, getpref, combineTR
+using EcoSISTEM
+import EcoSISTEM: AbstractTraitRelationship, AbstractTraits, iscontinuous, _traitfun, getpref, combineTR
 import Base.eltype
 
 mutable struct LCmatch{TR} <: AbstractTraitRelationship{TR}

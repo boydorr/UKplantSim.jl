@@ -3,15 +3,14 @@ using JuliaDB
 using JuliaDBMeta
 using BritishNationalGrid
 using Unitful
-using Simulation.Units
+using EcoSISTEM.Units
 using Unitful.DefaultSymbols
 using AxisArrays
 using Statistics
-using Simulation
+using EcoSISTEM
 using Distributions
 using Diversity
 using Plots
-gr()
 
 bsbi = loadtable("plantdata/PlantData_87to99.txt")
 species = loadtable("plantdata/PlantData_Species.txt")

@@ -1,8 +1,8 @@
-using Simulation
+using EcoSISTEM
 using Unitful
 using Unitful.DefaultSymbols
-using Simulation.Units
-import Simulation: matchdict, cancel, HabitatUpdate, NoChange, eraChange, AbstractBudget, checkbud, _habitatupdate!
+using EcoSISTEM.Units
+import EcoSISTEM: matchdict, cancel, HabitatUpdate, NoChange, eraChange, AbstractBudget, checkbud, _habitatupdate!
 
 function lcAE(lc::LandCover, maxbud::Unitful.Quantity{Float64}, area::Unitful.Area)
     lc = LandCover(lc.array[:, 0.0m .. 1.25e6m])
@@ -54,11 +54,11 @@ function hadAE(had::HadUK, maxbud::Unitful.Quantity{Float64}, area::Unitful.Area
 
     hab = ContinuousTimeHab(Array(had.array), 1, gridsquaresize,
         HabitatUpdate{Unitful.Dimensions{()}}(eraChange, 0.0/s))
-    B = Simulation.cancel(maxbud, area)
+    B = EcoSISTEM.cancel(maxbud, area)
     bud = zeros(typeof(B), dimension)
     fill!(bud, B/(dimension[1]*dimension[2]))
-    Simulation.checkbud(B) || error("Unrecognised unit in budget")
-    budtype = Simulation.matchdict[unit(B)]
+    EcoSISTEM.checkbud(B) || error("Unrecognised unit in budget")
+    budtype = EcoSISTEM.matchdict[unit(B)]
      return GridAbioticEnv{typeof(hab), budtype}(hab, active, budtype(bud))
 end
 function hadAE(had::HadUK, maxbud::Unitful.Quantity{Float64}, area::Unitful.Area, active::Array{Bool, 2})
