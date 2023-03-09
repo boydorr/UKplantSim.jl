@@ -2,7 +2,7 @@
 ## GBIF RUN ##
 ##############
 
-using UKclim
+using UKplantSim
 using JuliaDB
 using JuliaDBMeta
 using BritishNationalGrid
@@ -19,11 +19,11 @@ using Plots
 gr()
 
 uk = JuliaDB.load("UKspecies")
-uk = @transform uk {east = BNGPoint(lon = :decimallongitude, lat = :decimallatitude).e, north = BNGPoint(lon = :decimallongitude, lat = :decimallatitude).n}
+uk = transform(uk, (:east => (:decimallatitude, :decimallongitude) => x -> BNGPoint(lon = x[2], lat = x[1]).e, :north => (:decimallatitude, :decimallongitude) => x -> BNGPoint(lon = x[2], lat = x[1]).n))
 
 # Create reference for UK grid
 ref = createRef(1000.0m, 1000.0m, 7e5m, 1000.0m, 1.3e6m)
-uk = @transform uk {refval = UKclim.extractvalues(:east * m, :north * m, ref)}
+uk = transform(uk, :refval => (:east, :north) => x -> extractvalues(x[1] * m, x[2] * m, ref))
 
 traits = load("GBIF_had_prefs_UK")
 traits = filter(t-> !isnan(t.sun) & !isnan(t.rainfall) & !isnan(t.tas_st) & !isnan(t.rain_st), traits)
@@ -132,11 +132,12 @@ species = loadtable("plantdata/PlantData_Species.txt")
 squares = loadtable("plantdata/PlantData_Squares.txt")
 bsbi = join(bsbi, squares, lkey = :OS_SQUARE, rkey = :OS_SQUARE)
 bsbi = join(bsbi, species, lkey = :TAXONNO, rkey = :TAXONNO)
-bsbi = @transform bsbi {SppID = :TAXONNO}
+bsbi = rename(bsbi, :TAXONNO => :SppID)
 
 # Create reference for UK grid
-ref = createRef(1000.0m, 500.0m, 7e5m, 500.0m, 1.25e6m)
-bsbi = @transform bsbi {refval = UKclim.extractvalues(:EAST * m, :NORTH * m, ref), refid = 1}
+ref = createRef(1000.0m, 500.0m, 7e5m, 500.0m, 1.3e6m)
+bsbi = transform(bsbi, (:refval => (:EAST, :NORTH) => x -> UKplantSim.extractvalues(x[1] * m, x[1] * m, ref)))
+bsbi = insertcols(bsbi, 2, :refid => fill(1, length(bsbi)))
 
 traits = load("BSBI_had_prefs_UK")
 traits = filter(t-> !isnan(t.sun) & !isnan(t.rainfall) & !isnan(t.tas_st) & !isnan(t.rain_st), traits)
@@ -229,7 +230,7 @@ JLD.save("BSBI_abun_gauss.jld", "abun", eco.abundances.matrix)
 # PLot results
 cd("/home/claireh/Documents/UK")
 using Diversity
-using UKclim
+using UKplantSim
 using EcoSISTEM.Units
 using JLD
 using Plots

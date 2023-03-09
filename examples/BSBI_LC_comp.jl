@@ -1,7 +1,5 @@
-cd("/home/claireh/Documents/UK")
-using UKclim
+using UKplantSim
 using JuliaDB
-using JuliaDBMeta
 using BritishNationalGrid
 using Unitful
 using EcoSISTEM.Units
@@ -9,28 +7,27 @@ using Unitful.DefaultSymbols
 using AxisArrays
 using Statistics
 using StatsBase
-using DataStructures
 using EcoSISTEM
 using Distributions
 using Diversity
 using JLD
 using Plots
-gr()
 
-bsbi = loadtable("plantdata/PlantData_87to99.txt")
-species = loadtable("plantdata/PlantData_Species.txt")
-squares = loadtable("plantdata/PlantData_Squares.txt")
+bsbi = loadtable("data/plantdata/PlantData_87to99.txt")
+species = loadtable("data/plantdata/PlantData_Species.txt")
+squares = loadtable("data/plantdata/PlantData_Squares.txt")
 bsbi = join(bsbi, squares, lkey = :OS_SQUARE, rkey = :OS_SQUARE)
 bsbi = join(bsbi, species, lkey = :TAXONNO, rkey = :TAXONNO)
-bsbi = @transform bsbi {SppID = :TAXONNO}
+bsbi = rename(bsbi, :TAXONNO => :SppID)
 
 # Create reference for UK grid
 ref = createRef(1000.0m, 500.0m, 7e5m, 500.0m, 1.3e6m)
-bsbi = @transform bsbi {refval = UKclim.extractvalues(:EAST * m, :NORTH * m, ref), refid = 1}
+bsbi = transform(bsbi, (:refval => (:EAST, :NORTH) => x -> UKplantSim.extractvalues(x[1] * m, x[1] * m, ref)))
+bsbi = insertcols(bsbi, 2, :refid => fill(1, length(bsbi)))
 
 file = "CEH_landcover_2015.tif"
 lc = readLC(file)
-bsbi = @transform bsbi {lc = lc.array[:refval]}
+bsbi = transform(bsbi, :lc => lc.array[:refval])
 
 function top_ten(x)
   count = collect(values(countmap(x)))
@@ -39,7 +36,7 @@ function top_ten(x)
   top_species = species[sortperm(count, rev=true)]
   return top_species[count[sortperm(count, rev=true)] .> thresh]
 end
-bsbi_lc = @groupby bsbi :lc {species = top_ten(:NAME)}
+bsbi_lc = groupby((species = :NAME => top_ten), bsbi, :lc)
 
 broadleavedwoods = filter(b -> b.lc == 1, bsbi)
 filter(b -> b.NAME == "Quercus robur", broadleavedwoods)

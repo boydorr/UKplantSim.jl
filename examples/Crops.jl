@@ -1,4 +1,4 @@
-using UKclim
+using UKplantSim
 using JuliaDB
 using JuliaDBMeta
 using BritishNationalGrid
@@ -13,11 +13,9 @@ using Diversity
 using Plots
 gr()
 
-import UKclim.LandCover
+import UKplantSim.LandCover
 
-cd("/home/claireh/Documents/UK/")
-
-crop = readCrop("Crop2017.tif")
+crop = readCrop("data/Crop2017.tif")
 
 times = collect(2008year:1month:2017year+11month)
 dir = "HadUK/sun/"

@@ -1,5 +1,5 @@
 cd("/home/claireh/Documents/UK")
-using UKclim
+using UKplantSim
 using JuliaDB
 using JuliaDBMeta
 using BritishNationalGrid
@@ -24,11 +24,12 @@ species = loadtable("plantdata/PlantData_Species.txt")
 squares = loadtable("plantdata/PlantData_Squares.txt")
 bsbi = join(bsbi, squares, lkey = :OS_SQUARE, rkey = :OS_SQUARE)
 bsbi = join(bsbi, species, lkey = :TAXONNO, rkey = :TAXONNO)
-bsbi = @transform bsbi {SppID = :TAXONNO}
+bsbi = rename(bsbi, :TAXONNO => :SppID)
 
 # Create reference for UK grid
-ref = createRef(1000.0m, 500.0m, 7e5m, 500.0m, 1.25e6m)
-bsbi = @transform bsbi {refval = UKclim.extractvalues(:EAST * m, :NORTH * m, ref), refid = 1}
+ref = createRef(1000.0m, 500.0m, 7e5m, 500.0m, 1.3e6m)
+bsbi = transform(bsbi, (:refval => (:EAST, :NORTH) => x -> UKplantSim.extractvalues(x[1] * m, x[1] * m, ref)))
+bsbi = insertcols(bsbi, 2, :refid => fill(1, length(bsbi)))
 
 traits = JuliaDB.load("BSBI_had_prefs_UK")
 traits = filter(t-> !isnan(t.sun) & !isnan(t.rainfall) & !isnan(t.tas_st) & !isnan(t.rain_st), traits)
@@ -122,7 +123,7 @@ JLD.save("BSBI_lc.jld", "abun")
 # PLot results
 cd("/home/claireh/Documents/UK")
 using Diversity
-using UKclim
+using UKplantSim
 using EcoSISTEM.Units
 using JLD
 using Plots
@@ -145,11 +146,12 @@ species = loadtable("plantdata/PlantData_Species.txt")
 squares = loadtable("plantdata/PlantData_Squares.txt")
 bsbi = join(bsbi, squares, lkey = :OS_SQUARE, rkey = :OS_SQUARE)
 bsbi = join(bsbi, species, lkey = :TAXONNO, rkey = :TAXONNO)
-bsbi = @transform bsbi {SppID = :TAXONNO}
+bsbi = rename(bsbi, :TAXONNO => :SppID)
 
 # Create reference for UK grid
-ref = createRef(1000.0m, 500.0m, 7e5m, 500.0m, 1.25e6m)
-bsbi = @transform bsbi {refval = UKclim.extractvalues(:EAST * m, :NORTH * m, ref), refid = 1}
+ref = createRef(1000.0m, 500.0m, 7e5m, 500.0m, 1.3e6m)
+bsbi = transform(bsbi, (:refval => (:EAST, :NORTH) => x -> UKplantSim.extractvalues(x[1] * m, x[1] * m, ref)))
+bsbi = insertcols(bsbi, 2, :refid => fill(1, length(bsbi)))
 
 traits = JuliaDB.load("Crop_had_prefs_UK")
 bsbi = filter(u-> u.NAME in JuliaDB.select(traits, :NAME), bsbi)
@@ -260,7 +262,7 @@ JLD.save("BSBI_abun_crop2.jld", "abun", eco.abundances.matrix)
 # PLot results
 cd("/home/claireh/Documents/UK")
 using Diversity
-using UKclim
+using UKplantSim
 using EcoSISTEM.Units
 using JLD
 using Plots

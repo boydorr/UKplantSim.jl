@@ -1,4 +1,4 @@
-using UKclim
+using UKplantSim
 using JuliaDB
 using JuliaDBMeta
 using BritishNationalGrid
@@ -12,23 +12,26 @@ using Distributions
 using Diversity
 using Plots
 
-bsbi = loadtable("plantdata/PlantData_87to99.txt")
-species = loadtable("plantdata/PlantData_Species.txt")
-squares = loadtable("plantdata/PlantData_Squares.txt")
+bsbi = loadtable("data/plantdata/PlantData_87to99.txt")
+species = loadtable("data/plantdata/PlantData_Species.txt")
+squares = loadtable("data/plantdata/PlantData_Squares.txt")
 bsbi = join(bsbi, squares, lkey = :OS_SQUARE, rkey = :OS_SQUARE)
 bsbi = join(bsbi, species, lkey = :TAXONNO, rkey = :TAXONNO)
-bsbi = @transform bsbi {SppID = :TAXONNO}
+bsbi = rename(bsbi, :TAXONNO => :SppID)
+
 bsbi = distribute(bsbi, 12)
 
-pa = readPlantATT("PLANTATT_19_Nov_08.csv")
+pa = readPlantATT("data/PLANTATT_19_Nov_08.csv")
 
 spp_bsbi = unique(collect(select(bsbi, :NAME)))
 spp_pa = collect(select(pa, :Taxon_name))
 cross_species = spp_bsbi ∩ spp_pa
 bsbi = filter(b -> b.NAME ∈ cross_species, bsbi)
 
-ref = createRef(1000.0m, 500.0m, 7e5m, 500.0m, 1.25e6m)
-bsbi = @transform bsbi {refval = UKclim.extractvalues(:EAST * m, :NORTH * m, ref), refid = 1}
+# Create reference for UK grid
+ref = createRef(1000.0m, 500.0m, 7e5m, 500.0m, 1.3e6m)
+bsbi = transform(bsbi, (:refval => (:EAST, :NORTH) => x -> UKplantSim.extractvalues(x[1] * m, x[2] * m, ref)))
+bsbi = insertcols(bsbi, 2, :refid => fill(1, length(bsbi)))
 
 start = startingArray(bsbi, length(species), 10)
 
@@ -40,17 +43,17 @@ heatmap(transpose(abun), background_color = :lightblue, background_color_outside
 grid = false, color = :algae, aspect_ratio = 1)
 
 
-bsbi = @transform bsbi {cr = coarsenRef(:refval, 700, 10)}
+bsbi = transform(bsbi, :cr => :refval => x -> coarsenRef(x, 700, 10))
 
 @everywhere namean(x) = mean(x[.!isnan.(x)])
 @everywhere nastd(x) = std(x[.!isnan.(x)])
 @everywhere using Statistics
-dir = "HadUK/tas/"
+dir = "data/HadUK/tas/"
 times = collect(2008year:1month:2017year+11month)
 tas = readHadUK(dir, "tas", times)
-dir = "HadUK/rainfall/"
+dir = "data/HadUK/rainfall/"
 rainfall = readHadUK(dir, "rainfall", times)
-dir = "HadUK/sun/"
+dir = "data/HadUK/sun/"
 sun = readHadUK(dir, "sun", times)
 
 # Take means of 2015 (same as for LC)
@@ -59,21 +62,21 @@ meanrainfall2015 = mapslices(mean, rainfall.array[:, :, 2015year..2015year+11mon
 meansun2015 = mapslices(mean, (uconvert.(kJ, 1km^2 .* sun.array[:, :, 2015year..2015year+11months] .* 1000*(W/m^2)))./kJ, dims = 3)[:, :, 1]
 
 # Extract reference values
-bsbi = @transform bsbi {tas = mean(meantas2015[:cr]), rainfall = mean(meanrainfall2015[:cr]), sun = mean(meansun2015[:cr])}
+bsbi = transform(bsbi, (:tas => :refval => x -> meantas2015[x], :rainfall => :refval => x -> meanrainfall2015[x], :sun => :refval => x -> meansun2015[x]))
 
 # Calculate averages per species and plot as histogram
-bsbi_counts = collect(@groupby bsbi :NAME {tas = namean(:tas), rainfall = namean(:rainfall), sun = namean(:sun), tas_st = nastd(:tas), rain_st = nastd(:rainfall)})
+bsbi_counts = collect(groupby((tas = :tas => namean, rainfall = :rainfall => namean, sun = :sun => namean, tas_st = :tas_st => nastd, rain_st = :rain_st => nastd), uk, :species))
 save(bsbi_counts, "BSBI_had_prefs_UK")
 
-lc = readLC("CEH_landcover_2015.tif")
-bsbi = @transform bsbi {lc = lc.array[:refval]}
-LC_counts = collect(@groupby bsbi :NAME {lc = [sum(:lc .== i) for i in 1:21]})
+lc = readLC("data/CEH_landcover_2015.tif")
+bsbi = transform(bsbi, :lc => :refval => x -> lc.array[x])
+LC_counts = collect(groupby(countmap, pr, :NAME, select = :lc))
 save(LC_counts, "BSBI_lc_prefs_uk")
 
 save(bsbi, "BSBI_prefs_UK")
 
-soils = readSoils("HuttonSoils.tif")
-bsbi = @transform bsbi {soil = soils.array[:refval]}
-soil_counts = collect(@groupby bsbi :NAME {soil = unique(:soil)})
-soil_counts = @where soil_counts !all(isnan.(:soil))
+soils = readSoils("data/HuttonSoils.tif")
+bsbi = transform(bsbi, :soil => :refval => x -> soils.array[x])
+soil_counts = collect(groupby(unique, bsbi, :NAME, select =:soil))
+soil_counts = filter(s -> !all(isnan.(s.unique)), soil_counts)
 save(soil_counts, "BSBI_soil_prefs_uk")
