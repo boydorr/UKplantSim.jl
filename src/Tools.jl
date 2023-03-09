@@ -2,7 +2,6 @@ using BritishNationalGrid
 using EcoSISTEM.ClimatePref
 using AxisArrays
 using Unitful
-using JuliaDBMeta
 using JuliaDB
 using Distributions
 using LinearAlgebra
@@ -139,7 +138,7 @@ be spread across.
 function startingArray(bsbi::JuliaDB.IndexedTable, numspecies::Int64, sf::Int64, res::Unitful.Length{Float64} = 1000.0m, xmin::Unitful.Length{Float64} = 500.0m, xmax::Unitful.Length{Float64} = 7e5m, ymin::Unitful.Length{Float64} = 500.0m, ymax::Unitful.Length{Float64} = 1.25e6m)
     ref = createRef(res, xmin, xmax, ymin, ymax)
     fillarray = Array{Int64, 2}(undef, numspecies, length(ref.array))
-    grouped_tab = @groupby bsbi (:SppID, :refval) {count = length(:refid)}
+    grouped_tab = groupby((:count => :refid => length), bsbi, (:SppID, :refval))
     ids = sort(unique(collect(select(bsbi, :SppID))))
     dict = Dict(zip(ids, 1:length(ids)))
     #sppnames = [dict[x] for x in collect(select(grouped_tab, :SppID))]

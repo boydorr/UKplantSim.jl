@@ -1,4 +1,4 @@
-using UKclim
+using UKplantSim
 using JuliaDB
 using JuliaDBMeta
 using BritishNationalGrid
@@ -30,7 +30,7 @@ bsbi = @transform bsbi {SppID = :TAXONNO}
 
 # Create reference for UK grid
 ref = createRef(1000.0m, 500.0m, 7e5m, 500.0m, 1.25e6m)
-bsbi = @transform bsbi {refval = UKclim.extractvalues(:EAST * m, :NORTH * m, ref), refid = 1}
+bsbi = @transform bsbi {refval = UKplantSim.extractvalues(:EAST * m, :NORTH * m, ref), refid = 1}
 
 neilspecies = loadtable("data/KF_Plant traits_AC.csv")
 joinspecies = join(neilspecies, bsbi, lkey = :Species, rkey = :NAME, how = :inner)

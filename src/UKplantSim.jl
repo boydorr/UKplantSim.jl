@@ -1,4 +1,4 @@
-module UKclim
+module UKplantSim
 
 #include("extractHadUK.jl")
 #export retrieve_HadUK
