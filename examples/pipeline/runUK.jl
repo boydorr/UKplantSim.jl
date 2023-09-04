@@ -45,7 +45,7 @@ psd .+= 1e-3mm
 prec_traits = GaussTrait(pmean, psd)
 
 av_dist = rand(Uniform(0.6, 2.4), numSpecies) .* km
-kernel = GaussianKernel(av_dist, 10e-10)
+kernel = GaussianKernel.(av_dist, 10e-10)
 movement = BirthOnlyMovement(kernel, NoBoundary())
 
 abun = rand(Multinomial(individuals, numSpecies))
