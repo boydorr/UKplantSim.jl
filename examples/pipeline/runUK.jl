@@ -1,3 +1,4 @@
+using Pkg; Pkg.instantiate()
 using UKplantSim
 using DataFrames
 using DataFramesMeta
