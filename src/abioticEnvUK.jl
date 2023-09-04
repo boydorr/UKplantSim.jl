@@ -13,7 +13,7 @@ function lcAE(lc::LandCover, maxbud::Unitful.Quantity{Float64}, area::Unitful.Ar
     active[isnan.(lc.array[:,:,1])] .= false
 
     hab = DiscreteHab(Array(lc.array), gridsquaresize,
-        HabitatUpdate{Unitful.Dimensions{()}}(NoChange, 0.0/s))
+        HabitatUpdate(NoChange, 0.0/s))
     B = cancel(maxbud, area)
     bud = zeros(typeof(B), dimension)
     fill!(bud, B/(dimension[1]*dimension[2]))
@@ -27,7 +27,7 @@ function lcAE(lc::LandCover, maxbud::Unitful.Quantity{Float64}, area::Unitful.Ar
     gridsquaresize = lc.array.axes[1].val[2] - lc.array.axes[1].val[1]
     gridsquaresize = uconvert(km, gridsquaresize)
     hab = DiscreteHab(Array(lc.array), gridsquaresize,
-        HabitatUpdate{Unitful.Dimensions{()}}(NoChange, 0.0/s))
+        HabitatUpdate(NoChange, 0.0/s))
     B = cancel(maxbud, area)
     bud = zeros(typeof(B), dimension)
     fill!(bud, B/(dimension[1]*dimension[2]))
@@ -41,7 +41,7 @@ function lcAE(lc::LandCover, bud::SolarTimeBudget, active::Array{Bool, 2})
     gridsquaresize = lc.array.axes[1].val[2] - lc.array.axes[1].val[1]
     gridsquaresize = uconvert(km, gridsquaresize)
     hab = DiscreteHab(Array(lc.array), gridsquaresize,
-        HabitatUpdate{Unitful.Dimensions{()}}(NoChange, 0.0/s))
+        HabitatUpdate(NoChange, 0.0/s))
 
      return GridAbioticEnv{typeof(hab), SolarTimeBudget}(hab, active, bud)
 end
@@ -53,7 +53,7 @@ function hadAE(had::HadUK, maxbud::Unitful.Quantity{Float64}, area::Unitful.Area
     active[isnan.(had.array[:,:,1])] .= false
 
     hab = ContinuousTimeHab(Array(had.array), 1, gridsquaresize,
-        HabitatUpdate{Unitful.Dimensions{()}}(eraChange, 0.0/s))
+        HabitatUpdate(eraChange, 0.0/s))
     B = EcoSISTEM.cancel(maxbud, area)
     bud = zeros(typeof(B), dimension)
     fill!(bud, B/(dimension[1]*dimension[2]))
@@ -66,7 +66,7 @@ function hadAE(had::HadUK, maxbud::Unitful.Quantity{Float64}, area::Unitful.Area
     gridsquaresize = had.array.axes[1].val[2] - had.array.axes[1].val[1]
     gridsquaresize = ustrip.(gridsquaresize) * 111.32km
     hab = ContinuousTimeHab(Array(era.array), 1, gridsquaresize,
-        HabitatUpdate{Unitful.Dimensions{()}}(eraChange, 0.0/s))
+        HabitatUpdate(eraChange, 0.0/s))
     B = cancel(maxbud, area)
     bud = zeros(typeof(B), dimension)
     fill!(bud, B/(dimension[1]*dimension[2]))
@@ -79,7 +79,7 @@ function hadAE(had::HadUK, bud::B, active::Array{Bool, 2}) where {B <: AbstractB
     gridsquaresize = had.array.axes[1].val[2] - had.array.axes[1].val[1]
     gridsquaresize = uconvert(km, gridsquaresize)
     hab = ContinuousTimeHab(Array(had.array), 1, gridsquaresize,
-        HabitatUpdate{Unitful.Dimensions{()}}(eraChange, 0.0/s))
+        HabitatUpdate(eraChange, 0.0/s))
 
      return GridAbioticEnv{typeof(hab), SolarTimeBudget}(hab, active, bud)
 end
@@ -93,7 +93,7 @@ function soilAE(soil::Soils, maxbud::Unitful.Quantity{Float64}, area::Unitful.Ar
     active[isnan.(soil.array[:,:,1])] .= false
 
     hab = DiscreteHab(Array(soil.array), gridsquaresize,
-        HabitatUpdate{Unitful.Dimensions{()}}(NoChange, 0.0/s))
+        HabitatUpdate(NoChange, 0.0/s))
     B = cancel(maxbud, area)
     bud = zeros(typeof(B), dimension)
     fill!(bud, B/(dimension[1]*dimension[2]))
@@ -121,7 +121,7 @@ function soilAE(soil::Soils, bud::SolarTimeBudget, active::Array{Bool, 2})
     gridsquaresize = soil.array.axes[1].val[2] - soil.array.axes[1].val[1]
     gridsquaresize = uconvert(km, gridsquaresize)
     hab = DiscreteHab(Array(soil.array), gridsquaresize,
-        HabitatUpdate{Unitful.Dimensions{()}}(NoChange, 0.0/s))
+        HabitatUpdate(NoChange, 0.0/s))
 
      return GridAbioticEnv{typeof(hab), SolarTimeBudget}(hab, active, bud)
 end
