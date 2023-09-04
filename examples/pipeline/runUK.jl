@@ -18,8 +18,7 @@ using DataPipeline
 handle = DataPipeline.initialise()
 
 path = link_read!(handle, "UKModel/Had-prefs")
-JLD2.@load path
-traits = had_counts
+traits = JLD2.load_object(path)
 traits = filter(t-> !isnan(t.sun) & !isnan(t.rainfall) & !isnan(t.tas_st) & !isnan(t.rain_st), traits)
 traits = filter(t -> (t.rain_st > 0) & (t.tas_st > 0), traits)
 numSpecies = length(traits)
@@ -97,7 +96,7 @@ rel = multiplicativeTR2(rel1, rel2)
 eco = Ecosystem(emptypopulate!, sppl, ae, rel)
 
 path = link_read!(handle, "UKModel/StartArray")
-JLD2.@load path
+start = JLD2.load_object(path)
 eco.abundances.matrix .+= start
 
 abun = norm_sub_alpha(Metacommunity(start), 0.0)[:diversity]
