@@ -2,7 +2,7 @@ run_metadata:
   default_input_namespace: claireh93
   description: UK Model julia
   script: |
-    julia --project=examples examples/pipeline/runUK.jl
+    export JULIA_NUM_THREADS=20; julia --project=examples examples/pipeline/runUK.jl
 read:
 - data_product: UKModel/GBIF-records
 - data_product: UKModel/PLANTATT-data
