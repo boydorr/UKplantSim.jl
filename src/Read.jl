@@ -3,8 +3,7 @@ using Unitful.DefaultSymbols
 using EcoSISTEM.Units
 using AxisArrays
 using NetCDF
-using JuliaDB
-using JLD
+using JLD2
 
 import Unitful.°, Unitful.°C, Unitful.mm
 import ArchGDAL
@@ -184,29 +183,9 @@ function readUKCP(file::String, param::String, times::Vector{T}, active::String)
     uk = AxisArray(array[:, :, :, 1], Axis{:easting}(lon * m), Axis{:northing}(lat * m), Axis{:month}(times))
     uk = upres(uk, 12)
     uk = uk[1000.0m..7e5m, 1000.0m..1.25e6m, :]
-    active_grid = JLD.load(active, "active") .== 0
+    active_grid = JLD2.load(active, "active") .== 0
     uk[active_grid, :] *= NaN
     return UKCP(uk)
-end
-
-
-"""
-    readPlantATT(file::String)
-
-Function to import PlantATT data as a JuliaDB table.
-"""
-function readPlantATT(file::String)
-    coldict = Dict(:BRC_code => String, :Taxon_name => String, :Fam => String, :FamA => String, :OrdA => String, :NS => String, :CS => String, :RS => String, :Chg => Float64, :Hght => Float64, :Len => Float64, :P1 => String, :P2 => String, :LF1 => String, :LF2 => String, :W => String, :Clone1 => String, :Clone2 => String, :E1 => Int64, :E2 => Int64, :C => String, :NBI => Int64, :NEur => String, :SBI => Int64, :SEur => String, :Origin => String, :GB => Int64, :IR => Int64, :CI => Int64, :Tjan => Float64, :Tjul => Float64, :Prec => Int64, :Co => String, :Br_Habitats => Vector{Int64}, :L => Int64, :F => Int64, :R => Int64, :N => Int64, :S => Int64)
-    return loadtable(file, colparsers = coldict)
-end
-
-"""
-    readNPMS(file::String)
-
-Function to import National Plant Monitoring Scheme data as a JuliaDB table.
-"""
-function readNPMS(file::String)
-    return loadtable(file)
 end
 
 """

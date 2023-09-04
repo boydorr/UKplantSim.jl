@@ -1,0 +1,21 @@
+run_metadata:
+  default_input_namespace: claireh93
+  description: UK Model julia
+  script: |
+    julia --project=examples examples/pipeline/runUK.jl
+read:
+- data_product: UKModel/GBIF-records
+- data_product: UKModel/PLANTATT-data
+- data_product: UKModel/Had-prefs
+- data_product: UKModel/LCM
+- data_product: UKModel/HadUK-tas
+- data_product: UKModel/HadUK-rain
+- data_product: UKModel/HadUK-sun
+- data_product: UKModel/StartArray
+
+write:
+- data_product: GBIF-uk-run
+  description: Plot of final UK plant abundances
+  file_type: pdf
+  use: 
+    data_product: UKModel/GBIF-uk-run

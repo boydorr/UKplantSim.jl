@@ -3,6 +3,11 @@ module UKplantSim
 #include("extractHadUK.jl")
 #export retrieve_HadUK
 
+using Unitful
+using Unitful.DefaultSymbols
+
+include("units.jl")
+
 include("ClimateTypes.jl")
 export HadUK, LandCover, CropCover, Soils
 
