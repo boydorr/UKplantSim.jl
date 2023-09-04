@@ -103,7 +103,7 @@ eco.abundances.matrix .+= start[keep_rows, :]
 
 simulate!(eco, 1year, 1month)
 
-abun = norm_sub_alpha(Metacommunity(abun), 0.0)[!, :diversity]
+abun = norm_sub_alpha(Metacommunity(eco.abundances.matrix), 0.0)[!, :diversity]
 abun = reshape(abun, 700, 1250)
 abun[isnan.(abun)] .= 0
 abun[.!active] .= NaN
