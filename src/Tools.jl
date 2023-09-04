@@ -5,6 +5,8 @@ using Unitful
 using Distributions
 using LinearAlgebra
 using EcoSISTEM
+using DataFrames
+using DataFrameMacros
 
 """
     OSGR_eastnorth(osgridref::String)
