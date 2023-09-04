@@ -21,26 +21,26 @@ path = link_read!(handle, "UKModel/Had-prefs")
 traits = JLD2.load_object(path)
 traits = filter(t-> !isnan(t.sun) & !isnan(t.rainfall) & !isnan(t.tas_st) & !isnan(t.rain_st), traits)
 traits = filter(t -> (t.rain_st > 0) & (t.tas_st > 0), traits)
-numSpecies = length(traits)
+numSpecies = nrow(traits)
 individuals = Int(1e9)
 
 # Set up species requirements
 sizes = abs.(rand(Normal(0.01, 0.01), numSpecies))
-solarreq = collect(select(traits, :sun)) .* kJ
+solarreq = traits.sun .* kJ
 req1 = SolarRequirement(solarreq .* sizes)
 
-waterreq = collect(select(traits, :rainfall)) .* mm
+waterreq = traits.rainfall .* mm
 req2 = WaterRequirement(waterreq .* sizes)
 
 req = ReqCollection2(req1, req2)
 
-tmean = collect(select(traits, :tas)) .* K
-tsd = collect(select(traits, :tas_st)) .* K
+tmean = traits.tas .* K
+tsd = traits.tas_st .* K
 tsd .+= 1e-3K
 temp_traits = GaussTrait(tmean, tsd)
 
-pmean = collect(select(traits, :rainfall)) .* mm
-psd = collect(select(traits, :rain_st)) .* mm
+pmean = traits.rainfall .* mm
+psd = traits.rain_st .* mm
 psd .+= 1e-3mm
 prec_traits = GaussTrait(pmean, psd)
 
