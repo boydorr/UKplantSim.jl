@@ -101,16 +101,9 @@ path = link_read!(handle, "UKModel/StartArray")
 start = JLD2.load_object(path)
 eco.abundances.matrix .+= start[keep_rows, :]
 
-abun = norm_sub_alpha(Metacommunity(start), 0.0)[:diversity]
-abun = reshape(abun, 700, 1250)
-abun[isnan.(abun)] .= 0
-abun[.!active] .= NaN
-# heatmap(transpose(abun), background_color = :lightblue, background_color_outside = :white,
-grid = false, color = :algae, aspect_ratio = 1)
-
 simulate!(eco, 1year, 1month)
 
-abun = norm_sub_alpha(Metacommunity(abun), 0.0)[:diversity]
+abun = norm_sub_alpha(Metacommunity(abun), 0.0)[!, :diversity]
 abun = reshape(abun, 700, 1250)
 abun[isnan.(abun)] .= 0
 abun[.!active] .= NaN
