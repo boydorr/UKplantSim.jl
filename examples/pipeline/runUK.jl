@@ -19,6 +19,8 @@ handle = DataPipeline.initialise()
 
 path = link_read!(handle, "UKModel/Had-prefs")
 traits = JLD2.load_object(path)
+removed_rows = findall(isnan.(traits.sun) .| isnan.(traits.rainfall) .| isnan.(traits.tas_st) .| isnan.(traits.rain_st) .| (traits.rain_st .<= 0) .| (traits.tas_st .<= 0))
+keep_rows = setdiff(1:nrow(traits), removed_rows)
 traits = filter(t-> !isnan(t.sun) & !isnan(t.rainfall) & !isnan(t.tas_st) & !isnan(t.rain_st), traits)
 traits = filter(t -> (t.rain_st > 0) & (t.tas_st > 0), traits)
 numSpecies = nrow(traits)
@@ -97,7 +99,7 @@ eco = Ecosystem(emptypopulate!, sppl, ae, rel)
 
 path = link_read!(handle, "UKModel/StartArray")
 start = JLD2.load_object(path)
-eco.abundances.matrix .+= start
+eco.abundances.matrix .+= start[keep_rows, :]
 
 abun = norm_sub_alpha(Metacommunity(start), 0.0)[:diversity]
 abun = reshape(abun, 700, 1250)
