@@ -88,7 +88,12 @@ end
 Function to import HadUK data into Julia from particular parameter.
 """
 function readHadUK(dir::String, param::String, times::Vector{T}) where T<: Unitful.Time
-    files = searchdir(dir, ".nc")
+    if isdir(dir)
+        files = searchdir(dir, ".nc")
+    else
+        files = [splitpath(dir)[end]]
+        dir = joinpath(splitpath(dir)[1:end-1])
+    end
     lat = ncread(joinpath(dir, files[1]), "projection_y_coordinate")
     lon = ncread(joinpath(dir, files[1]), "projection_x_coordinate")
     units = ncgetatt(joinpath(dir, files[1]), param, "units")
@@ -107,6 +112,7 @@ function readHadUK(dir::String, param::String, times::Vector{T}) where T<: Unitf
     uk = AxisArray(array, Axis{:easting}(lon * m), Axis{:northing}(lat * m), Axis{:month}(times))
     return HadUK(uk[0.0m..1e6m, 0.0m..1.25e6m, :])
 end
+
 
 """
     readCHESS(file::String)
